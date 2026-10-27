@@ -1,0 +1,1843 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Finish the Word!</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap');
+
+      :root {
+        font-family: ui-rounded, system-ui, -apple-system, Segoe UI, sans-serif;
+        color: #fff;
+        background: #15102f
+      }
+
+      * {
+        box-sizing: border-box
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(ellipse at 12% 0%, #5630a5 0, transparent 46%), radial-gradient(ellipse at 90% 95%, #183e8a 0, transparent 46%), #15102f
+      }
+
+      .wrap {
+        max-width: 1280px;
+        margin: auto;
+        min-height: 100vh;
+        padding: 24px 16px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .pill {
+        border-radius: 30px;
+        padding: 8px 14px;
+        background: #40306e;
+        font-size: 13px
+      }
+
+      .panel {
+        background: #2e235b;
+        border: 1px solid #6954a6;
+        border-radius: 25px;
+        padding: 25px;
+        box-shadow: 0 15px 35px #0d082c66
+      }
+
+      #home {
+        width: 100%;
+        max-width: 620px;
+        margin: auto;
+      }
+
+      .lobby-room {
+        width: 100%;
+        max-width: 620px;
+        margin: 0 auto;
+      }
+
+      .lobby-room .hero {
+        margin: 0;
+      }
+
+      #lobby {
+        width: 100%;
+        margin: auto 0;
+      }
+
+      #winner {
+        width: 100%;
+        max-width: 620px;
+        margin: auto;
+      }
+
+      #home input {
+        background: #1d163d;
+        color: #fff;
+        border: 1px solid #6954a6;
+      }
+
+      #home input::placeholder {
+        color: #a99bcc;
+      }
+
+      .room-choice button {
+        padding: 22px 20px;
+        font-size: 18px;
+      }
+
+      .setup-fields.join-mode {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .center {
+        text-align: center
+      }
+
+      .hero {
+        font-size: clamp(32px, 7vw, 62px);
+        line-height: 1.05;
+        margin: 10px 0 16px;
+        font-weight: 1000
+      }
+
+      .accent {
+        color: #ffe267
+      }
+
+      .sub {
+        color: #c9b9ed;
+        line-height: 1.5
+      }
+
+      .stack {
+        display: grid;
+        gap: 14px
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px
+      }
+
+      input,
+      button,
+      select {
+        font: inherit
+      }
+
+      input,
+      select {
+        background: #fff;
+        color: #241744;
+        border: 0;
+        border-radius: 13px;
+        padding: 16px;
+        width: 100%;
+        outline-offset: 3px
+      }
+
+      button {
+        border: 0;
+        border-radius: 13px;
+        padding: 15px 20px;
+        font-weight: 850;
+        cursor: pointer;
+        transition: transform .12s, filter .12s
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        filter: brightness(1.06)
+      }
+
+      button:disabled {
+        opacity: .5;
+        cursor: not-allowed
+      }
+
+      .yellow {
+        background: #ffe267;
+        color: #25133c
+      }
+
+      .pink {
+        background: #ff83b4;
+        color: #311332
+      }
+
+      .purple {
+        background: #8060f7;
+        color: #fff
+      }
+
+      .ghost {
+        background: #473779;
+        color: #fff
+      }
+
+      .small {
+        font-size: 13px;
+        padding: 10px 13px
+      }
+
+      .label {
+        font-weight: 750;
+        margin: 8px 0
+      }
+
+      .letter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 90px;
+        height: 90px;
+        border-radius: 25px;
+        background: #ffe267;
+        color: #2d1753;
+        font-size: 60px;
+        font-weight: 1000;
+        box-shadow: 0 8px 0 #c3a33b
+      }
+
+      .word-tiles {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 9px;
+        min-height: 98px;
+        margin: 22px 0;
+        padding: 15px;
+        border: 3px solid #777384;
+        border-radius: 22px;
+        background: #241b49;
+        transition: border-color .2s, box-shadow .2s;
+      }
+
+      .word-tiles.my-turn {
+        border-color: #67eac7;
+        box-shadow: 0 0 0 4px #67eac726, 0 0 24px #67eac72e;
+      }
+
+      .letter-choices {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin: 22px 0;
+      }
+
+      .letter-choice {
+        min-height: 78px;
+        padding: 10px;
+        background: #ffe267;
+        color: #2d1753;
+        font-size: clamp(30px, 5vw, 46px);
+        box-shadow: 0 6px 0 #c3a33b;
+      }
+
+      .keyboard-capture {
+        position: fixed;
+        left: 50%;
+        bottom: 0;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        border: 0;
+        opacity: 0;
+        pointer-events: none;
+        font-size: 16px;
+      }
+
+      .word-tile {
+        display: inline-grid;
+        place-items: center;
+        width: clamp(46px, 9vw, 68px);
+        height: clamp(58px, 11vw, 78px);
+        border-radius: 17px;
+        background: #fff;
+        color: #2d1753;
+        font-size: clamp(30px, 6vw, 47px);
+        font-weight: 1000;
+        text-transform: uppercase;
+        box-shadow: 0 6px 0 #bcaedb;
+      }
+
+      .word-tile.required {
+        background: #ffe267;
+        box-shadow: 0 6px 0 #c3a33b;
+      }
+
+      .word-tile.cursor {
+        background: transparent;
+        border: 3px dashed #8060f7;
+        box-shadow: none;
+        animation: cursorPulse 1.1s ease-in-out infinite;
+      }
+
+      .word-tile.arriving {
+        animation: letterArrive .3s ease-out both;
+        animation-delay: var(--bounce-delay, 0ms);
+      }
+
+      .word-tiles.disabled .word-tile.cursor {
+        display: none;
+      }
+
+      .word-tiles.invalid {
+        animation: invalidWordShake .38s ease-in-out, invalidOutlineFlash .7s ease-out;
+      }
+
+      .word-tiles.invalid .word-tile {
+        animation: invalidWordFlash .65s ease-out;
+      }
+
+      @keyframes cursorPulse {
+        50% { opacity: .42 }
+      }
+
+      @keyframes letterArrive {
+        0% { transform: translateY(0) }
+        38% { transform: translateY(-6px) }
+        68% { transform: translateY(2px) }
+        100% { transform: translateY(0) }
+      }
+
+      @keyframes invalidWordShake {
+        0%, 100% { transform: translateX(0) }
+        20%, 60% { transform: translateX(-9px) }
+        40%, 80% { transform: translateX(9px) }
+      }
+
+      @keyframes invalidOutlineFlash {
+        0%, 100% { border-color: #39ff88; box-shadow: -5px 5px 0 #0c6b35 }
+        18%, 78% { border-color: #d7ff3f; box-shadow: -5px 5px 0 #617716 }
+      }
+
+      @keyframes invalidWordFlash {
+        0%, 100% { background: #baffd2; color: #020805; border-color: #24643e }
+        25%, 75% { background: #d7ff3f; color: #020805; border-color: #d7ff3f; box-shadow: -5px 5px 0 #617716 }
+      }
+
+      .word-tiles.invalid .word-tile.required {
+        animation-name: invalidRequiredFlash;
+      }
+
+      @keyframes invalidRequiredFlash {
+        0%, 100% { background: #39ff88; color: #020805 }
+        25%, 75% { background: #d7ff3f; color: #020805; box-shadow: -5px 5px 0 #617716 }
+      }
+
+      .bar.invalid .fill {
+        animation: invalidTimerFlash .7s ease-out;
+      }
+
+      @keyframes invalidTimerFlash {
+        0%, 100% { background: #39ff88 }
+        18%, 78% { background: #d7ff3f; box-shadow: none }
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .word-tile.arriving,
+        .word-tiles.invalid {
+          animation: none;
+        }
+
+        .word-tiles.invalid {
+          border-color: #ff557f;
+        }
+
+        .bar.invalid .fill {
+          background: #ff315f;
+        }
+      }
+
+      .word {
+        font-size: clamp(32px, 7vw, 55px);
+        font-weight: 950;
+        overflow-wrap: anywhere;
+        margin: 15px 0
+      }
+
+      .timer {
+        font-size: 30px;
+        font-weight: 950;
+        margin: 22px 0 12px
+      }
+
+      .bar {
+        height: 12px;
+        background: #574782;
+        border-radius: 20px;
+        overflow: hidden
+      }
+
+      .fill {
+        height: 100%;
+        background: #67eac7;
+        transition: width .3s
+      }
+
+      .players {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px
+      }
+
+      .player {
+        background: #43336f;
+        border: 2px solid transparent;
+        border-radius: 15px;
+        padding: 13px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0
+      }
+
+      .player.active {
+        border-color: #ffe267
+      }
+
+      .player.out {
+        opacity: .4
+      }
+
+      .avatar {
+        background: #ffa7d4;
+        border-radius: 50%;
+        width: 33px;
+        height: 33px;
+        display: grid;
+        place-items: center;
+        color: #31153d;
+        font-weight: 900;
+        flex-shrink: 0
+      }
+
+      .lives {
+        display: flex;
+        gap: 3px;
+        margin-left: auto;
+        padding-left: 8px;
+        font-family: "Segoe UI Symbol", "Arial Unicode MS", sans-serif;
+        font-size: 21px;
+        line-height: 1;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .muted {
+        color: #c9b9ed;
+        font-size: 13px
+      }
+
+      .notice {
+        background: #49346d;
+        border-radius: 12px;
+        padding: 13px;
+        color: #fff;
+        min-height: 44px
+      }
+
+      .error {
+        background: #7b2d63
+      }
+
+      .hide {
+        display: none !important
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap
+      }
+
+      .row>* {
+        flex: 1
+      }
+
+      h2 {
+        margin: 0 0 16px
+      }
+
+      #game,
+      #lobby {
+        display: grid;
+        gap: 16px
+      }
+
+      #game {
+        width: 100%;
+        margin: auto 0;
+        grid-template-columns: minmax(210px, .8fr) minmax(420px, 1.6fr) minmax(210px, .8fr);
+        grid-template-areas: "players game power";
+        align-items: center;
+      }
+
+      .game-main {
+        grid-area: game;
+      }
+
+      .game-players {
+        grid-area: players;
+      }
+
+      .game-players .players {
+        grid-template-columns: 1fr;
+      }
+
+      .power-ups {
+        grid-area: power;
+        text-align: center;
+      }
+
+      .power-placeholder {
+        padding: 24px 12px;
+        border: 2px dashed #6954a6;
+        border-radius: 16px;
+        color: #a99bcc;
+      }
+
+      .result-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .result-players {
+        display: grid;
+        gap: 12px;
+        text-align: left;
+      }
+
+      .result-player {
+        padding: 14px;
+        border: 2px solid transparent;
+        border-radius: 18px;
+        background: #3c2e69;
+      }
+
+      .result-player.winner {
+        border-color: #ffe267;
+      }
+
+      .result-player-name {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+
+      .result-stat {
+        padding: 12px;
+        border-radius: 16px;
+        background: #241b49;
+      }
+
+      .result-stat strong {
+        display: block;
+        margin-top: 5px;
+        color: #ffe267;
+        font-size: 20px;
+      }
+
+      @media(max-width:900px) {
+        #game {
+          grid-template-columns: 1fr;
+          grid-template-areas:
+            "game"
+            "players"
+            "power";
+        }
+      }
+
+      @media(max-width:560px) {
+
+        .grid,
+        .players {
+          grid-template-columns: 1fr
+        }
+
+        .room-choice {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .panel {
+          padding: 19px
+        }
+
+        .letter {
+          width: 76px;
+          height: 76px;
+          font-size: 50px
+        }
+
+        .row>* {
+          flex-basis: 100%
+        }
+      }
+
+      /* Terminal-inspired visual system */
+      :root {
+        font-family: "Lucida Console", "Courier New", ui-monospace, monospace;
+        color: #baffd2;
+        background: #020403;
+        --ink: #020403;
+        --surface: #050907;
+        --surface-raised: #08110c;
+        --line: #24643e;
+        --paper: #baffd2;
+        --amber: #39ff88;
+        --amber-dark: #0c6b35;
+        --cyan: #39ff88;
+        --red: #d7ff3f;
+        --dim: #67a77d;
+      }
+
+      body {
+        background-color: var(--ink);
+        background-image:
+          linear-gradient(#12331f55 1px, transparent 1px),
+          linear-gradient(90deg, #12331f55 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background:
+          repeating-linear-gradient(0deg, #0000 0 3px, #39ff8809 3px 4px),
+          linear-gradient(180deg, #02040300 0%, #020403d9 100%);
+      }
+
+      .wrap {
+        padding: 32px 20px;
+      }
+
+      .panel {
+        position: relative;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 0;
+        padding: 25px;
+        box-shadow: -8px 8px 0 #000;
+      }
+
+      .hero {
+        font-family: "Pixelify Sans", "Lucida Console", monospace;
+        color: var(--paper);
+        font-weight: 700;
+        letter-spacing: -.04em;
+        text-shadow: -3px 3px 0 #0b5d2d;
+      }
+
+      .hero::before {
+        content: "> ";
+        color: var(--amber);
+      }
+
+      .accent,
+      .result-stat strong {
+        color: var(--amber);
+      }
+
+      .sub,
+      .muted {
+        color: var(--dim);
+      }
+
+      .label,
+      label,
+      h2 {
+        font-family: "Pixelify Sans", "Lucida Console", monospace;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+      }
+
+      input,
+      select {
+        background: #010302;
+        color: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 0;
+        caret-color: var(--amber);
+      }
+
+      #home input {
+        background: #010302;
+        color: var(--paper);
+        border-color: var(--line);
+      }
+
+      #home input::placeholder,
+      input::placeholder {
+        color: #477358;
+      }
+
+      input:focus,
+      select:focus,
+      button:focus-visible {
+        outline: 2px solid var(--cyan);
+        outline-offset: 3px;
+      }
+
+      button {
+        font-family: "Pixelify Sans", "Lucida Console", monospace;
+        border: 1px solid currentColor;
+        border-radius: 0;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        box-shadow: -4px 4px 0 #000;
+        transition: transform .1s, box-shadow .1s, background-color .1s;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translate(1px, -1px);
+        filter: none;
+        box-shadow: -6px 6px 0 #000;
+      }
+
+      button:active:not(:disabled) {
+        transform: translate(-3px, 3px);
+        box-shadow: -1px 1px 0 #000;
+      }
+
+      .yellow {
+        background: var(--amber);
+        color: #020805;
+      }
+
+      .pink {
+        background: #baffd2;
+        color: #020805;
+      }
+
+      .room-choice button {
+        background: #010302;
+        color: var(--amber);
+        border: 1px solid var(--amber);
+      }
+
+      .room-choice button.selected {
+        background: var(--amber);
+        color: #020805;
+      }
+
+      .purple,
+      .ghost {
+        background: #0b2113;
+        color: var(--paper);
+      }
+
+      .pill {
+        border: 1px solid var(--cyan);
+        border-radius: 0;
+        background: #06160c;
+        color: var(--cyan);
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+
+      .word-tiles {
+        border: 1px solid var(--line);
+        border-radius: 0;
+        background: #010302;
+        box-shadow: inset 0 0 0 4px #07120a;
+      }
+
+      .word-tiles.my-turn {
+        border-color: var(--cyan);
+        box-shadow: inset 0 0 0 4px #07120a, -5px 5px 0 #0c6b35;
+      }
+
+      .letter,
+      .letter-choice,
+      .word-tile {
+        font-family: "Pixelify Sans", "Lucida Console", monospace;
+        border-radius: 0;
+        background: var(--paper);
+        color: #020805;
+        box-shadow: -5px 5px 0 #24643e;
+      }
+
+      .letter,
+      .letter-choice,
+      .word-tile.required {
+        background: var(--amber);
+        color: #020805;
+        box-shadow: -5px 5px 0 var(--amber-dark);
+      }
+
+      .word-tile.cursor {
+        background: #020604;
+        border: 2px solid var(--cyan);
+        box-shadow: none;
+      }
+
+      .bar {
+        height: 14px;
+        padding: 2px;
+        border: 1px solid var(--line);
+        border-radius: 0;
+        background: #010302;
+      }
+
+      .fill {
+        background: var(--cyan);
+      }
+
+      .player,
+      .notice,
+      .power-placeholder,
+      .result-player,
+      .result-stat {
+        border-radius: 0;
+      }
+
+      .player {
+        background: var(--surface-raised);
+        border: 1px solid #19452b;
+      }
+
+      .player.active,
+      .result-player.winner {
+        border-color: var(--amber);
+        box-shadow: -3px 3px 0 var(--amber-dark);
+      }
+
+      .avatar {
+        border-radius: 0;
+        background: var(--cyan);
+        color: #020805;
+      }
+
+      .notice {
+        border-left: 4px solid var(--cyan);
+        background: #08170e;
+      }
+
+      .error {
+        border-color: var(--red);
+        background: #182008;
+      }
+
+      .power-placeholder {
+        border-color: var(--line);
+        color: var(--dim);
+      }
+
+      .result-player {
+        background: var(--surface-raised);
+      }
+
+      .result-stat {
+        background: #010302;
+        border: 1px solid #19452b;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <div id="connection" class="sr-only">Ready</div>
+      <section id="home" class="panel stack">
+        <div class="center">
+          <div class="hero">WORD CHAIN</div>
+        </div>
+        <div class="grid room-choice"><button id="showCreate" class="yellow" aria-pressed="false">Create Room</button><button id="showJoin" class="pink" aria-pressed="false">Join Room</button></div>
+        <div id="playerSetup" class="stack hide">
+          <div id="setupFields" class="setup-fields">
+            <div class="stack"><label for="name">Your nickname</label><input id="name" maxlength="20" placeholder="Enter your name" autocomplete="nickname"></div>
+            <div id="codeField" class="stack hide"><label for="code">4-letter room code</label><input id="code" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase"></div>
+          </div>
+          <div id="createBox" class="stack hide"><button id="create" class="yellow">Create Room →</button></div>
+          <div id="joinBox" class="stack hide"><button id="join" class="pink">Join Room →</button></div>
+        </div>
+        <div id="homeMsg" class="notice hide" role="alert"></div>
+      </section>
+      <section id="lobby" class="hide">
+        <div class="panel center stack lobby-room">
+          <div class="muted">YOUR ROOM CODE</div>
+          <div class="hero accent" id="roomCode">----</div><button id="share" class="ghost small">Copy Invite Link</button>
+          <button id="start" class="yellow">Start Game</button>
+        </div>
+        <div class="panel lobby-room">
+          <h2>Players <span id="lobbyCount" class="muted"></span></h2>
+          <div class="players" id="lobbyPlayers"></div>
+        </div>
+      </section>
+      <section id="game" class="hide">
+        <div class="panel center game-main">
+          <div class="pill" id="turnLabel">Waiting for your turn</div>
+          <div class="muted" style="margin-top:18px">LAST WORD</div>
+          <div class="word" id="lastWord">ANY WORD!</div>
+          <div class="sub" id="wordPrompt">Next word must start with</div>
+          <div id="wordTiles" class="word-tiles disabled" role="textbox" aria-label="Your word" aria-readonly="true"></div>
+          <div id="letterChoices" class="letter-choices hide" aria-label="Choose a starting letter"></div>
+          <input id="keyboardCapture" class="keyboard-capture" type="text" inputmode="text" enterkeyhint="send" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="Type your word">
+          <div class="timer" id="timer">00:15</div>
+          <div class="bar" id="timerBar">
+            <div class="fill" id="timerFill"></div>
+          </div>
+          <div id="gameMsg" class="sr-only" role="status" aria-live="polite"></div>
+        </div>
+        <div class="panel game-players">
+          <h2>Players</h2>
+          <div class="players" id="gamePlayers"></div>
+        </div>
+        <div class="panel power-ups">
+          <h2>Power Ups</h2>
+          <div class="power-placeholder">Coming soon</div>
+        </div>
+      </section>
+      <section id="winner" class="panel center stack hide">
+        <div class="hero accent">GAME OVER!</div>
+        <h2 id="winnerName"></h2>
+        <div id="resultsPlayers" class="result-players"></div>
+        <p class="sub">Thanks for playing!</p><button id="again" class="yellow">Return to Lobby</button>
+      </section>
+    </main>
+    <script type="module">
+      // Paste your Firebase web app config below. See README.md.
+      const firebaseConfig = {
+        apiKey: "AIzaSyDJoG2-forvs8vCjf7EFApuyt_Z8vubPkQ",
+        authDomain: "lettergame-8ef4b.firebaseapp.com",
+        databaseURL: "https://lettergame-8ef4b-default-rtdb.firebaseio.com/",
+        projectId: "lettergame-8ef4b",
+        appId: "1:277755176198:web:be30aa3714680548e8aa87"
+      };
+      const $ = id => document.getElementById(id);
+      let db, ref, get, set, update, runTransaction, onValue, serverTimestamp, roomId = null,
+        playerId = sessionStorage.getItem('ll_player') || crypto.randomUUID(),
+        room = null,
+        offset = 0,
+        unsubscribe = null,
+        checking = false,
+        typedLetters = '',
+        typingTurn = '',
+        invalidAnimationTimer = null,
+        draftPublishTimer = null,
+        renderedTileTurn = '',
+        renderedTileLetters = '',
+        timerErrorUntil = 0,
+        timerErrorText = '',
+        lobbyLayoutAnimation = null;
+      sessionStorage.setItem('ll_player', playerId);
+      $('name').value = localStorage.getItem('ll_name') || '';
+      const sections = ['home', 'lobby', 'game', 'winner'];
+      // Load the local dictionary once. Keep the game offline from third-party word APIs.
+      let dictionaryPromise,
+        dictionaryPrefixCounts = new Map();
+      function loadDictionary() {
+        if (!dictionaryPromise) {
+          dictionaryPromise = fetch(new URL('./words.json', import.meta.url))
+            .then(response => {
+              if (!response.ok) throw new Error('Dictionary file missing (HTTP ' + response.status + ').');
+              return response.json();
+            })
+            .then(words => {
+              dictionaryPrefixCounts = new Map();
+              for (const word of words) {
+                if (word.length < 2) continue;
+                for (const prefix of [word.slice(0, 1), word.slice(0, 2)]) {
+                  dictionaryPrefixCounts.set(prefix, (dictionaryPrefixCounts.get(prefix) || 0) + 1)
+                }
+              }
+              return new Set(words)
+            });
+        }
+        return dictionaryPromise;
+      }
+      loadDictionary().catch(error => console.warn('Dictionary loading failed:', error));
+
+
+      function show(id) {
+        sections.forEach(x => $(x).classList.toggle('hide', x !== id))
+      }
+
+      function message(id, s, bad = false) {
+        const e = $(id);
+        e.textContent = s;
+        e.classList.remove('hide');
+        e.classList.toggle('error', bad)
+      }
+
+      function nickname() {
+        const s = $('name').value.trim().replace(/[<>]/g, '').slice(0, 20);
+        if (!s) {
+          message('homeMsg', 'Please enter a nickname.', true);
+          return null
+        }
+        localStorage.setItem('ll_name', s);
+        return s
+      }
+
+      function players(r) {
+        return Object.entries(r?.players || {}).sort((a, b) => a[1].joined - b[1].joined)
+      }
+
+      function code() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        return Array.from(crypto.getRandomValues(new Uint8Array(4)), n => chars[n % chars.length]).join('')
+      }
+
+      function isHost(r) {
+        return r?.host === playerId
+      }
+
+      function validConfig() {
+        return firebaseConfig.apiKey !== 'PASTE_API_KEY' && !firebaseConfig.databaseURL.includes('PASTE_PROJECT_ID')
+      }
+      async function init() {
+        if (!validConfig()) {
+          message('homeMsg', 'Firebase setup required. Add your Firebase config to index.html (see README.md).', true);
+          $('connection').textContent = '● Setup needed';
+          return false
+        }
+        if (db) return true;
+        try {
+          const appMod = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js');
+          const dbMod = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js');
+          const app = appMod.initializeApp(firebaseConfig);
+          db = dbMod.getDatabase(app);
+          ({
+            ref,
+            get,
+            set,
+            update,
+            runTransaction,
+            onValue,
+            serverTimestamp
+          } = dbMod);
+          onValue(ref(db, '.info/serverTimeOffset'), s => {
+            offset = s.val() || 0
+          });
+          $('connection').textContent = '● Connected';
+          return true
+        } catch (e) {
+          message('homeMsg', 'Firebase connection failed: ' + e.message, true);
+          return false
+        }
+      }
+      async function create() {
+        const n = nickname();
+        if (!n || !await init()) return;
+        try {
+          let c;
+          for (let i = 0; i < 8; i++) {
+            c = code();
+            const result = await runTransaction(ref(db, 'rooms/' + c), current => current === null ? {
+              host: playerId,
+              status: 'lobby',
+              created: Date.now() + offset,
+              duration: 15,
+              players: {
+                [playerId]: {
+                  name: n,
+                  joined: Date.now() + offset,
+                  alive: true,
+                  lives: 2
+                }
+              }
+            } : undefined, {
+              applyLocally: false
+            });
+            if (result.committed) {
+              enter(c);
+              return
+            }
+          }
+          throw Error('Could not create a unique room')
+        } catch (e) {
+          message('homeMsg', e.message, true)
+        }
+      }
+      async function join() {
+        const n = nickname();
+        if (!n || !await init()) return;
+
+        const c = $('code').value.trim().toUpperCase();
+
+        if (!/^[A-Z]{4}$/.test(c)) {
+          message('homeMsg', 'Room codes are four letters.', true);
+          return;
+        }
+
+        try {
+          const roomRef = ref(db, 'rooms/' + c);
+          const snapshot = await get(roomRef);
+
+          if (!snapshot.exists()) {
+            throw Error('Room does not exist in Firebase.');
+          }
+
+          const current = snapshot.val();
+
+          if (current.status !== 'lobby') {
+            throw Error('Room has already started.');
+          }
+
+          if (Object.keys(current.players || {}).length >= 10) {
+            throw Error('Room is full.');
+          }
+
+          const result = await runTransaction(roomRef, r => {
+            if (r === null) {
+              return r;
+            }
+
+            if (r.status !== 'lobby') {
+              return;
+            }
+
+            if (r.players?.[playerId]) return r;
+
+            if (Object.keys(r.players || {}).length >= 10) return;
+
+            r.players = {
+              ...r.players,
+              [playerId]: {
+                name: n,
+                joined: Date.now() + offset,
+                alive: true,
+                lives: 2
+              }
+            };
+
+            return r;
+          }, { applyLocally: false });
+
+          if (!result.committed) {
+            throw Error('Join transaction was rejected.');
+          }
+
+          enter(c);
+
+        } catch (e) {
+          console.error('JOIN ERROR:', e);
+          message('homeMsg', e.message, true);
+        }
+      }
+
+      function enter(c) {
+        roomId = c;
+        history.replaceState(null, '', location.pathname + '?room=' + c);
+        unsubscribe?.();
+        unsubscribe = onValue(ref(db, 'rooms/' + c), snap => {
+          room = snap.val();
+          if (!room) {
+            message('homeMsg', 'Room no longer exists.', true);
+            show('home');
+            return
+          }
+          render()
+        });
+      }
+
+      function renderPlayers(id, r) {
+        const container = $(id);
+        const lobby = id === 'lobbyPlayers' ? $('lobby') : null;
+        const animateCentering = lobby && lobby.dataset.centered === 'true' &&
+          !matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (animateCentering) lobbyLayoutAnimation?.cancel();
+        const previousTop = animateCentering ? lobby.getBoundingClientRect().top : 0;
+        container.replaceChildren();
+        for (const [pid, p] of players(r)) {
+          const e = document.createElement('div');
+          e.className = 'player' + (r.status === 'playing' && r.turn === pid ? ' active' : '') + (!p.alive ? ' out' : '');
+          const a = document.createElement('div');
+          a.className = 'avatar';
+          a.textContent = p.name.slice(0, 1).toUpperCase();
+          const t = document.createElement('div');
+          const name = document.createElement('strong');
+          name.textContent = p.name + (pid === playerId ? ' (You)' : '');
+          const state = document.createElement('div');
+          state.className = 'muted';
+          const lives = p.lives ?? 2;
+          state.textContent = !p.alive ? 'Eliminated' : r.status === 'playing' ?
+            (r.turn === pid ? 'Playing now' : 'Waiting') :
+            pid === r.host ? 'Host' : 'Ready';
+          const hearts = document.createElement('div');
+          hearts.className = 'lives';
+          hearts.setAttribute('aria-label', `${lives} ${lives === 1 ? 'life' : 'lives'} remaining`);
+          for (let index = 0; index < lives; index++) {
+            const heart = document.createElement('span');
+            heart.setAttribute('aria-hidden', 'true');
+            heart.textContent = '♥';
+            hearts.append(heart)
+          }
+          t.append(name, state);
+          e.append(a, t, hearts);
+          container.append(e)
+        }
+        if (lobby) {
+          if (animateCentering) {
+            const centeredTop = lobby.getBoundingClientRect().top;
+            const distance = previousTop - centeredTop;
+            if (Math.abs(distance) > .5) {
+              lobbyLayoutAnimation = lobby.animate([
+                { transform: `translateY(${distance}px)` },
+                { transform: 'translateY(0)' }
+              ], {
+                duration: 350,
+                easing: 'cubic-bezier(.22,.8,.3,1)'
+              })
+            }
+          }
+          lobby.dataset.centered = 'true'
+        }
+      }
+
+      function renderResults(r) {
+        const container = $('resultsPlayers');
+        container.replaceChildren();
+        const orderedPlayers = players(r).sort(([firstId], [secondId]) =>
+          Number(secondId === r.winner) - Number(firstId === r.winner));
+        for (const [pid, player] of orderedPlayers) {
+          const stats = r.playerStats?.[pid] || {
+            words: 0,
+            totalTimeMs: 0,
+            totalWordLength: 0
+          };
+          const card = document.createElement('div');
+          card.className = 'result-player' + (pid === r.winner ? ' winner' : '');
+          const heading = document.createElement('div');
+          heading.className = 'result-player-name';
+          const name = document.createElement('strong');
+          name.textContent = player.name + (pid === playerId ? ' (You)' : '');
+          const placement = document.createElement('span');
+          placement.textContent = pid === r.winner ? 'Winner' : '';
+          heading.append(name, placement);
+          const statGrid = document.createElement('div');
+          statGrid.className = 'result-stats';
+          const values = [
+            ['AVERAGE TIME', stats.words ? (stats.totalTimeMs / stats.words / 1000).toFixed(1) + 's' : '—'],
+            ['AVERAGE WORD', stats.words ? (stats.totalWordLength / stats.words).toFixed(1) + ' letters' : '—'],
+            ['WORDS SUBMITTED', String(stats.words || 0)]
+          ];
+          for (const [label, value] of values) {
+            const stat = document.createElement('div');
+            stat.className = 'result-stat';
+            const statLabel = document.createElement('span');
+            statLabel.className = 'muted';
+            statLabel.textContent = label;
+            const statValue = document.createElement('strong');
+            statValue.textContent = value;
+            stat.append(statLabel, statValue);
+            statGrid.append(stat)
+          }
+          card.append(heading, statGrid);
+          container.append(card)
+        }
+      }
+
+      function prefixForRoom(r) {
+        if (!r) return '';
+        if (typeof r.requiredPrefix === 'string') return r.requiredPrefix.toLowerCase();
+        return r.lastWord?.slice(-1).toLowerCase() || ''
+      }
+
+      function requiredLetter() {
+        return prefixForRoom(room)
+      }
+
+      function hasUnusedPrefix(prefix, usedWords) {
+        const total = dictionaryPrefixCounts.get(prefix) || 0;
+        if (!total) return false;
+        let used = 0;
+        for (const word of usedWords || []) {
+          if (word.startsWith(prefix)) used++
+        }
+        return used < total
+      }
+
+      function randomPlayablePair(usedWords) {
+        const usedCounts = new Map();
+        for (const word of usedWords || []) {
+          const prefix = word.slice(0, 2);
+          usedCounts.set(prefix, (usedCounts.get(prefix) || 0) + 1)
+        }
+        const choices = [];
+        for (const [prefix, total] of dictionaryPrefixCounts) {
+          if (prefix.length === 2 && prefix !== 'xx' && (usedCounts.get(prefix) || 0) < total) choices.push(prefix)
+        }
+        if (!choices.length) return '';
+        const random = crypto.getRandomValues(new Uint32Array(1))[0];
+        return choices[random % choices.length]
+      }
+
+      function randomOpeningLetters() {
+        const choices = [...'abcdefghijklmnopqrstuvwxyz'].filter(letter => hasUnusedPrefix(letter, []));
+        for (let index = choices.length - 1; index > 0; index--) {
+          const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % (index + 1);
+          [choices[index], choices[randomIndex]] = [choices[randomIndex], choices[index]]
+        }
+        return choices.slice(0, 4)
+      }
+
+      function chooseNextPrefix(word, usedWords) {
+        const twoLetters = word.slice(-2);
+        const pairIsPlayable = twoLetters.length === 2 && twoLetters !== 'xx' && hasUnusedPrefix(twoLetters, usedWords);
+        const completedWords = usedWords?.length || 0;
+        const progression = Math.min(1, Math.max(0, completedWords - 1) / 74);
+        const twoLetterChance = .1 + progression * .8;
+        const randomValue = crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
+        if (pairIsPlayable && randomValue < twoLetterChance) return twoLetters;
+        const oneLetter = word.slice(-1);
+        if (hasUnusedPrefix(oneLetter, usedWords)) return oneLetter;
+        if (pairIsPlayable) return twoLetters;
+        const randomPair = randomPlayablePair(usedWords);
+        if (randomPair) return randomPair;
+        return ''
+      }
+
+      function isMyTurn() {
+        return room?.status === 'playing' && !room.openingChoice && room.turn === playerId && room.players?.[playerId]?.alive
+      }
+
+
+      function nextAlivePlayer(r, current) {
+        const oldIndex = r.order.indexOf(current);
+        return r.order.slice(oldIndex + 1).concat(r.order.slice(0, oldIndex)).find(id => r.players[id]?.alive)
+      }
+
+      function focusKeyboard() {
+        try {
+          $('keyboardCapture').focus({ preventScroll: true })
+        } catch {
+          $('keyboardCapture').focus()
+        }
+      }
+
+      function renderWordTiles(myTurn = room?.turn === playerId && room?.players?.[playerId]?.alive) {
+        const container = $('wordTiles');
+        const required = requiredLetter();
+        const visibleLetters = myTurn ? typedLetters :
+          room?.draftTurn === room?.turnNumber && room?.draftPlayer === room?.turn ? (room.draft || '') : '';
+        const turnKey = `${room?.turn || ''}:${room?.turnNumber || 0}`;
+        const sameTurn = renderedTileTurn === turnKey;
+        const arrivingFrom = !sameTurn ? 0 :
+          visibleLetters.startsWith(renderedTileLetters) ? renderedTileLetters.length : visibleLetters.length;
+        container.replaceChildren();
+        container.classList.toggle('disabled', !myTurn);
+        container.classList.toggle('my-turn', Boolean(myTurn));
+        for (const character of required) {
+          const tile = document.createElement('span');
+          tile.className = 'word-tile required';
+          tile.textContent = character;
+          container.append(tile)
+        }
+        for (const [index, character] of [...visibleLetters].entries()) {
+          const tile = document.createElement('span');
+          tile.className = 'word-tile' + (index >= arrivingFrom ? ' arriving' : '');
+          if (index >= arrivingFrom) tile.style.setProperty('--bounce-delay', `${(index - arrivingFrom) * 75}ms`);
+          tile.addEventListener('animationend', event => {
+            if (event.animationName === 'letterArrive') tile.classList.remove('arriving')
+          });
+          tile.textContent = character;
+          container.append(tile)
+        }
+        if (myTurn) {
+          const cursor = document.createElement('span');
+          cursor.className = 'word-tile cursor';
+          cursor.setAttribute('aria-hidden', 'true');
+          container.append(cursor)
+        }
+        const word = required + visibleLetters;
+        container.setAttribute('aria-label', word ? 'Your word: ' + word : 'Your word is empty');
+        renderedTileTurn = turnKey;
+        renderedTileLetters = visibleLetters
+      }
+
+      function renderLetterChoices() {
+        const container = $('letterChoices');
+        container.replaceChildren();
+        const canChoose = room?.openingChoice && room.turn === playerId && room.players?.[playerId]?.alive;
+        for (const letter of room?.openingLetters || []) {
+          const button = document.createElement('button');
+          button.className = 'letter-choice';
+          button.type = 'button';
+          button.textContent = letter.toUpperCase();
+          button.disabled = !canChoose;
+          button.onclick = () => chooseOpeningLetter(letter);
+          container.append(button)
+        }
+      }
+
+      function publishDraft() {
+        clearTimeout(draftPublishTimer);
+        const turnNumber = room?.turnNumber;
+        const draft = typedLetters;
+        draftPublishTimer = setTimeout(async () => {
+          if (!roomId || room?.status !== 'playing' || room.turn !== playerId || room.turnNumber !== turnNumber) return;
+          try {
+            await update(ref(db, 'rooms/' + roomId), {
+              draft,
+              draftPlayer: playerId,
+              draftTurn: turnNumber
+            })
+          } catch (error) {
+            console.warn('Could not share typing:', error)
+          }
+        }, 180)
+      }
+
+      function flashInvalidWord(reason) {
+        const container = $('wordTiles');
+        clearTimeout(invalidAnimationTimer);
+        container.classList.remove('invalid');
+        $('timerBar').classList.remove('invalid');
+        void container.offsetWidth;
+        container.classList.add('invalid');
+        $('timerBar').classList.add('invalid');
+        timerErrorText = reason;
+        timerErrorUntil = Date.now() + 700;
+        $('timer').textContent = reason;
+        invalidAnimationTimer = setTimeout(() => {
+          container.classList.remove('invalid');
+          $('timerBar').classList.remove('invalid');
+          timerErrorUntil = 0;
+          if (room?.status === 'playing') {
+            const remaining = Math.max(0, room.deadline - Date.now() - offset);
+            $('timer').textContent = '00:' + String(Math.ceil(remaining / 1000)).padStart(2, '0')
+          }
+        }, 700)
+      }
+
+      function render() {
+        if (!room) return;
+        if (room.status === 'lobby') {
+          show('lobby');
+          $('roomCode').textContent = roomId;
+          $('lobbyCount').textContent = `(${players(room).length}/10)`;
+          renderPlayers('lobbyPlayers', room);
+          $('start').disabled = !isHost(room) || players(room).length < 2;
+          return
+        }
+        if (room.status === 'finished') {
+          show('winner');
+          $('winnerName').textContent = (room.players?.[room.winner]?.name || 'Nobody') + ' wins!';
+          renderResults(room);
+          return
+        }
+        show('game');
+        renderPlayers('gamePlayers', room);
+        $('lastWord').textContent = room.lastWord || 'ANY WORD!';
+        const choosing = Boolean(room.openingChoice);
+        const myTurn = !choosing && room.turn === playerId && room.players?.[playerId]?.alive;
+        const turnKey = `${room.turn || ''}:${room.turnNumber || 0}`;
+        if (typingTurn !== turnKey) {
+          typedLetters = '';
+          typingTurn = turnKey
+        }
+        $('wordTiles').classList.toggle('hide', choosing);
+        $('letterChoices').classList.toggle('hide', !choosing);
+        if (choosing) {
+          const recipient = nextAlivePlayer(room, room.turn);
+          $('wordPrompt').textContent = 'Choose a letter for ' + (room.players?.[recipient]?.name || 'the next player');
+          renderLetterChoices()
+        } else {
+          $('wordPrompt').textContent = requiredLetter() ? 'Next word must start with' : 'Type any word';
+          renderWordTiles(myTurn)
+        }
+        if (myTurn && document.activeElement !== $('keyboardCapture')) requestAnimationFrame(focusKeyboard);
+        $('turnLabel').textContent = choosing ?
+          (room.turn === playerId ? 'YOUR TURN — CHOOSE!' : (room.players?.[room.turn]?.name || 'Someone') + ' is choosing…') :
+          myTurn ? 'YOUR TURN!' : (room.players?.[room.turn]?.name || 'Someone') + ' is thinking…';
+      }
+      async function start() {
+        if (!room || !isHost(room)) return;
+        try {
+          await loadDictionary();
+          const openingLetters = randomOpeningLetters();
+          if (openingLetters.length < 4) throw Error('Could not find four playable starting letters.');
+          const result = await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'lobby' || r.host !== playerId || Object.keys(r.players || {}).length < 2) return;
+            const order = players(r).map(([id]) => id);
+            for (const id of order) {
+              r.players[id].alive = true;
+              r.players[id].lives = 2
+            }
+            r.status = 'playing';
+            r.duration = 15;
+            r.order = order;
+            r.turn = order[crypto.getRandomValues(new Uint32Array(1))[0] % order.length];
+            r.lastWord = '';
+            r.requiredPrefix = '';
+            r.openingChoice = true;
+            r.openingLetters = openingLetters;
+            r.words = [];
+            r.draft = '';
+            r.draftPlayer = '';
+            r.draftTurn = 1;
+            r.turnNumber = 1;
+            r.turnMistakes = 0;
+            r.stats = {
+              words: 0,
+              totalTimeMs: 0,
+              totalWordLength: 0
+            };
+            r.playerStats = Object.fromEntries(order.map(id => [id, {
+              words: 0,
+              totalTimeMs: 0,
+              totalWordLength: 0
+            }]));
+            r.turnStartedAt = Date.now() + offset;
+            r.deadline = r.turnStartedAt + 15000;
+            return r
+          }, {
+            applyLocally: false
+          });
+          if (result.committed) {
+            room = result.snapshot.val();
+            render()
+          }
+        } catch (e) {
+          message('homeMsg', e.message, true)
+        }
+      }
+
+      async function chooseOpeningLetter(letter) {
+        if (!room?.openingChoice || room.turn !== playerId || !(room.openingLetters || []).includes(letter)) return;
+        const turnNumber = room.turnNumber;
+        try {
+          const result = await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'playing' || !r.openingChoice || r.turn !== playerId || r.turnNumber !== turnNumber) return;
+            if (!(r.openingLetters || []).includes(letter)) return;
+            const next = nextAlivePlayer(r, playerId);
+            if (!next) return;
+            r.openingChoice = false;
+            r.openingLetters = [];
+            r.requiredPrefix = letter;
+            r.turn = next;
+            r.turnMistakes = 0;
+            r.turnNumber = (r.turnNumber || 0) + 1;
+            r.draft = '';
+            r.draftPlayer = '';
+            r.draftTurn = r.turnNumber;
+            r.turnStartedAt = Date.now() + offset;
+            r.deadline = r.turnStartedAt + 15000;
+            return r
+          }, {
+            applyLocally: false
+          });
+          if (result.committed) {
+            room = result.snapshot.val();
+            render()
+          }
+        } catch (error) {
+          console.warn('Could not choose opening letter:', error)
+        }
+      }
+
+      function loseLifeAndEndTurn(r, turn) {
+        const player = r.players[turn];
+        player.lives = Math.max(0, (player.lives ?? 2) - 1);
+        player.alive = player.lives > 0;
+        r.turnMistakes = 0;
+        r.draft = '';
+        r.draftPlayer = '';
+        r.turnNumber = (r.turnNumber || 0) + 1;
+        r.draftTurn = r.turnNumber;
+        const alive = r.order.filter(id => r.players[id]?.alive);
+        if (alive.length <= 1) {
+          r.status = 'finished';
+          r.winner = alive[0] || '';
+          r.turn = '';
+          r.deadline = 0;
+          return r
+        }
+        r.turn = nextAlivePlayer(r, turn);
+        r.turnStartedAt = Date.now() + offset;
+        r.deadline = r.turnStartedAt + 15000;
+        return r
+      }
+
+      async function registerMistake() {
+        const turnNumber = room?.turnNumber;
+        try {
+          await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'playing' || r.turn !== playerId || r.turnNumber !== turnNumber || !r.players?.[playerId]?.alive) return;
+            if (Date.now() + offset > r.deadline + 500) return;
+            r.turnMistakes = (r.turnMistakes || 0) + 1;
+            if (r.turnMistakes >= 5) return loseLifeAndEndTurn(r, playerId);
+            return r
+          }, {
+            applyLocally: false
+          })
+        } catch (error) {
+          console.warn('Could not record mistake:', error)
+        }
+      }
+
+      async function submitWord() {
+        if (!room || checking) return;
+        const submittedAt = Date.now() + offset;
+        const word = requiredLetter() + typedLetters;
+        if (!/^[a-z]{2,40}$/.test(word)) {
+          message('gameMsg', 'Use an English word with at least 2 letters (A–Z only).', true);
+          return
+        }
+        if (requiredLetter() && !word.startsWith(requiredLetter())) {
+          message('gameMsg', 'Your word must start with ' + requiredLetter().toUpperCase() + '.', true);
+          return
+        }
+        if ((room.words || []).includes(word)) {
+          message('gameMsg', 'That word has already been used!', true);
+          flashInvalidWord('ALREADY USED');
+          registerMistake();
+          return
+        }
+        checking = true;
+        try {
+          const dictionary = await loadDictionary();
+          if (!dictionary.has(word)) {
+            message('gameMsg', 'Not found in the dictionary. Try another word.', true);
+            flashInvalidWord('NOT A WORD');
+            registerMistake();
+            return;
+          }
+          const result = await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'playing' || r.turn !== playerId || !r.players?.[playerId]?.alive || submittedAt > r.deadline + 500) return;
+            const required = prefixForRoom(r);
+            if (required && !word.startsWith(required)) return;
+            if ((r.words || []).includes(word)) return;
+            r.words = [...(r.words || []), word];
+            r.lastWord = word;
+            r.requiredPrefix = chooseNextPrefix(word, r.words);
+            const turnStartedAt = r.turnStartedAt || r.deadline - 15000;
+            const timeSpent = Math.max(0, Math.min(15000, submittedAt - turnStartedAt));
+            r.stats = r.stats || {
+              words: 0,
+              totalTimeMs: 0,
+              totalWordLength: 0
+            };
+            r.stats.words += 1;
+            r.stats.totalTimeMs += timeSpent;
+            r.stats.totalWordLength += word.length;
+            r.playerStats = r.playerStats || {};
+            const playerStats = r.playerStats[playerId] || {
+              words: 0,
+              totalTimeMs: 0,
+              totalWordLength: 0
+            };
+            playerStats.words += 1;
+            playerStats.totalTimeMs += timeSpent;
+            playerStats.totalWordLength += word.length;
+            r.playerStats[playerId] = playerStats;
+            r.draft = '';
+            r.draftPlayer = '';
+            r.turnMistakes = 0;
+            const alive = r.order.filter(id => r.players[id]?.alive);
+            const idx = alive.indexOf(playerId);
+            r.turn = alive[(idx + 1) % alive.length];
+            r.turnNumber = (r.turnNumber || 0) + 1;
+            r.turnStartedAt = Date.now() + offset;
+            r.deadline = r.turnStartedAt + 15000;
+            return r
+          }, {
+            applyLocally: false
+          });
+          if (result.committed) {
+            typedLetters = '';
+            room = result.snapshot.val();
+            render();
+            message('gameMsg', 'Nice word!')
+          } else message('gameMsg', 'Turn expired or the game changed. Try again.', true)
+        } catch (e) {
+          message('gameMsg', 'Could not validate word: ' + e.message + ' Make sure words.json is uploaded beside lettergame.html.', true)
+        } finally {
+          checking = false;
+        }
+      }
+
+      function handleGameTyping(event) {
+        if (!isMyTurn() || checking || event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return;
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          submitWord();
+          return
+        }
+        if (event.key === 'Backspace') {
+          event.preventDefault();
+          typedLetters = typedLetters.slice(0, -1);
+          renderWordTiles(true);
+          publishDraft();
+          return
+        }
+        if (/^[a-z]$/i.test(event.key) && typedLetters.length < 40 - requiredLetter().length) {
+          event.preventDefault();
+          typedLetters += event.key.toLowerCase();
+          renderWordTiles(true);
+          publishDraft()
+        }
+      }
+
+      function handleMobileBeforeInput(event) {
+        if (!isMyTurn() || checking) {
+          event.preventDefault();
+          return
+        }
+        if (event.inputType === 'deleteContentBackward') {
+          event.preventDefault();
+          typedLetters = typedLetters.slice(0, -1);
+          renderWordTiles(true);
+          publishDraft();
+          return
+        }
+        if (event.inputType === 'insertLineBreak') {
+          event.preventDefault();
+          submitWord();
+          return
+        }
+        if (event.inputType.startsWith('insert') && event.data) {
+          event.preventDefault();
+          const available = 40 - requiredLetter().length - typedLetters.length;
+          const letters = event.data.toLowerCase().replace(/[^a-z]/g, '').slice(0, available);
+          if (!letters) return;
+          typedLetters += letters;
+          renderWordTiles(true);
+          publishDraft()
+        }
+      }
+
+      function handleMobileInput() {
+        const capture = $('keyboardCapture');
+        const value = capture.value;
+        capture.value = '';
+        if (!value || !isMyTurn() || checking) return;
+        const available = 40 - requiredLetter().length - typedLetters.length;
+        const letters = value.toLowerCase().replace(/[^a-z]/g, '').slice(0, available);
+        if (!letters) return;
+        typedLetters += letters;
+        renderWordTiles(true);
+        publishDraft()
+      }
+      async function expireTurn() {
+        if (!room || room.status !== 'playing' || Date.now() + offset < room.deadline + 800) return;
+        const turn = room.turn,
+          turnNo = room.turnNumber;
+        try {
+          await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'playing' || r.turn !== turn || r.turnNumber !== turnNo || Date.now() + offset < r.deadline + 800) return;
+            return loseLifeAndEndTurn(r, turn)
+          }, {
+            applyLocally: false
+          })
+        } catch (e) {
+          console.warn('Timeout sync failed', e)
+        }
+      }
+      setInterval(() => {
+        if (!room || room.status !== 'playing') return;
+        const remaining = Math.max(0, room.deadline - Date.now() - offset);
+        $('timer').textContent = Date.now() < timerErrorUntil ? timerErrorText :
+          '00:' + String(Math.ceil(remaining / 1000)).padStart(2, '0');
+        $('timerFill').style.width = (remaining / 15000 * 100) + '%';
+        $('timerFill').style.background = remaining < 5000 ? '#d7ff3f' : '#39ff88';
+        if (room.deadline - Date.now() - offset <= -800) expireTurn()
+      }, 350);
+      function showHomeMode(mode) {
+        $('showCreate').classList.toggle('selected', mode === 'create');
+        $('showJoin').classList.toggle('selected', mode === 'join');
+        $('showCreate').setAttribute('aria-pressed', String(mode === 'create'));
+        $('showJoin').setAttribute('aria-pressed', String(mode === 'join'));
+        $('playerSetup').classList.remove('hide');
+        $('setupFields').classList.toggle('join-mode', mode === 'join');
+        $('codeField').classList.toggle('hide', mode !== 'join');
+        $('createBox').classList.toggle('hide', mode !== 'create');
+        $('joinBox').classList.toggle('hide', mode !== 'join');
+        $('homeMsg').classList.add('hide');
+        if (!$('name').value.trim()) $('name').focus();
+        else if (mode === 'join') $('code').focus()
+      }
+      $('create').onclick = create;
+      $('showCreate').onclick = () => showHomeMode('create');
+      $('showJoin').onclick = () => showHomeMode('join');
+      $('join').onclick = join;
+      $('start').onclick = start;
+      document.addEventListener('keydown', handleGameTyping);
+      $('keyboardCapture').addEventListener('beforeinput', handleMobileBeforeInput);
+      $('keyboardCapture').addEventListener('input', handleMobileInput);
+      $('wordTiles').addEventListener('click', focusKeyboard);
+      $('share').onclick = async () => {
+        const url = location.href;
+        try {
+          await navigator.clipboard.writeText(url);
+          $('share').textContent = 'Link copied!'
+        } catch {
+          $('share').textContent = url
+        }
+      };
+      $('again').onclick = async () => {
+        if (!roomId) return;
+        try {
+          await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'finished') return;
+            r.status = 'lobby';
+            r.turn = '';
+            r.winner = '';
+            r.order = [];
+            r.lastWord = '';
+            r.requiredPrefix = '';
+            r.openingChoice = false;
+            r.openingLetters = [];
+            r.words = [];
+            r.deadline = 0;
+            r.turnStartedAt = 0;
+            r.turnNumber = 0;
+            r.turnMistakes = 0;
+            r.stats = {
+              words: 0,
+              totalTimeMs: 0,
+              totalWordLength: 0
+            };
+            r.playerStats = {};
+            r.draft = '';
+            r.draftPlayer = '';
+            r.draftTurn = 0;
+            for (const player of Object.values(r.players || {})) {
+              player.alive = true;
+              player.lives = 2
+            }
+            return r
+          }, {
+            applyLocally: false
+          })
+        } catch (error) {
+          console.warn('Could not return to lobby:', error)
+        }
+      };
+      const invite = new URLSearchParams(location.search).get('room');
+      if (invite && /^[A-Z]{4}$/i.test(invite)) {
+        $('code').value = invite.toUpperCase();
+        showHomeMode('join')
+      }
+    </script>
+  </body>
+</html>
