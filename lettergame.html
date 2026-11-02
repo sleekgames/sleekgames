@@ -1,0 +1,2547 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Finish the Word!</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Press+Start+2P&display=swap');
+
+      :root {
+        font-family: ui-rounded, system-ui, -apple-system, Segoe UI, sans-serif;
+        color: #fff;
+        background: #15102f
+      }
+
+      * {
+        box-sizing: border-box
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(ellipse at 12% 0%, #5630a5 0, transparent 46%), radial-gradient(ellipse at 90% 95%, #183e8a 0, transparent 46%), #15102f
+      }
+
+      .wrap {
+        max-width: 1280px;
+        margin: auto;
+        min-height: 100vh;
+        padding: 24px 16px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .panel {
+        background: #2e235b;
+        border: 1px solid #6954a6;
+        border-radius: 25px;
+        padding: 25px;
+        box-shadow: 0 15px 35px #0d082c66
+      }
+
+      #home {
+        width: 100%;
+        max-width: 620px;
+        margin: auto;
+      }
+
+      .lobby-room {
+        width: 100%;
+        max-width: 620px;
+        margin: 0 auto;
+      }
+
+      .lobby-room .hero {
+        margin: 0;
+      }
+
+      #lobby {
+        width: 100%;
+        margin: auto 0;
+      }
+
+      #winner {
+        width: 100%;
+        max-width: 620px;
+        margin: auto;
+      }
+
+      #home input {
+        background: #1d163d;
+        color: #fff;
+        border: 1px solid #6954a6;
+      }
+
+      #home input::placeholder {
+        color: #a99bcc;
+      }
+
+      .room-choice button {
+        padding: 22px 20px;
+        font-size: 18px;
+      }
+
+      .setup-fields.join-mode {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .center {
+        text-align: center
+      }
+
+      .hero {
+        font-size: clamp(32px, 7vw, 62px);
+        line-height: 1.05;
+        margin: 10px 0 16px;
+        font-weight: 1000
+      }
+
+      .accent {
+        color: #ffe267
+      }
+
+      .sub {
+        color: #c9b9ed;
+        line-height: 1.5
+      }
+
+      .stack {
+        display: grid;
+        gap: 14px
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px
+      }
+
+      input,
+      button,
+      select {
+        font: inherit
+      }
+
+      input,
+      select {
+        background: #fff;
+        color: #241744;
+        border: 0;
+        border-radius: 13px;
+        padding: 16px;
+        width: 100%;
+        outline-offset: 3px
+      }
+
+      button {
+        border: 0;
+        border-radius: 13px;
+        padding: 15px 20px;
+        font-weight: 850;
+        cursor: pointer;
+        transition: transform .12s, filter .12s
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        filter: brightness(1.06)
+      }
+
+      button:disabled {
+        opacity: .5;
+        cursor: not-allowed
+      }
+
+      .yellow {
+        background: #ffe267;
+        color: #25133c
+      }
+
+      .pink {
+        background: #ff83b4;
+        color: #311332
+      }
+
+      .purple {
+        background: #8060f7;
+        color: #fff
+      }
+
+      .ghost {
+        background: #473779;
+        color: #fff
+      }
+
+      .small {
+        font-size: 13px;
+        padding: 10px 13px
+      }
+
+      .label {
+        font-weight: 750;
+        margin: 8px 0
+      }
+
+      .letter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 90px;
+        height: 90px;
+        border-radius: 25px;
+        background: #ffe267;
+        color: #2d1753;
+        font-size: 60px;
+        font-weight: 1000;
+        box-shadow: 0 8px 0 #c3a33b
+      }
+
+      .word-tiles {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 9px;
+        min-height: 98px;
+        margin: 22px 0;
+        padding: 15px;
+        border: 3px solid #777384;
+        border-radius: 22px;
+        background: #241b49;
+        transition: border-color .2s, box-shadow .2s;
+      }
+
+      .word-tiles.my-turn {
+        border-color: #67eac7;
+        box-shadow: 0 0 0 4px #67eac726, 0 0 24px #67eac72e;
+      }
+
+      .letter-choices {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin: 22px 0;
+      }
+
+      .letter-choice {
+        min-height: 78px;
+        padding: 10px;
+        background: #ffe267;
+        color: #2d1753;
+        font-size: clamp(30px, 5vw, 46px);
+        box-shadow: 0 6px 0 #c3a33b;
+      }
+
+      .keyboard-capture {
+        position: fixed;
+        left: 50%;
+        bottom: 0;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        border: 0;
+        opacity: 0;
+        pointer-events: none;
+        font-size: 16px;
+      }
+
+      .word-tile {
+        display: inline-grid;
+        place-items: center;
+        width: clamp(46px, 9vw, 68px);
+        height: clamp(58px, 11vw, 78px);
+        border-radius: 17px;
+        background: #fff;
+        color: #2d1753;
+        font-size: clamp(30px, 6vw, 47px);
+        font-weight: 1000;
+        text-transform: uppercase;
+        box-shadow: 0 6px 0 #bcaedb;
+      }
+
+      .word-tile.required {
+        background: #ffe267;
+        box-shadow: 0 6px 0 #c3a33b;
+      }
+
+      .word-tile.cursor {
+        background: transparent;
+        border: 3px dashed #8060f7;
+        box-shadow: none;
+        animation: cursorPulse 1.1s ease-in-out infinite;
+      }
+
+      .word-tile.arriving {
+        animation: letterArrive .3s ease-out both;
+        animation-delay: var(--bounce-delay, 0ms);
+      }
+
+      .word-tiles.disabled .word-tile.cursor {
+        display: none;
+      }
+
+      .word-tiles.invalid {
+        animation: invalidWordShake .38s ease-in-out, invalidOutlineFlash .7s ease-out;
+      }
+
+      .game-main.invalid {
+        animation: invalidWordShake .38s ease-in-out, invalidOutlineFlash .7s ease-out;
+      }
+
+      .word-tiles.invalid .word-tile {
+        animation: invalidWordFlash .65s ease-out;
+      }
+
+      @keyframes cursorPulse {
+        0%, 49% { opacity: 1 }
+        50%, 100% { opacity: 0 }
+      }
+
+      @keyframes letterArrive {
+        0% { transform: translateY(0) }
+        38% { transform: translateY(-6px) }
+        68% { transform: translateY(2px) }
+        100% { transform: translateY(0) }
+      }
+
+      @keyframes invalidWordShake {
+        0%, 100% { transform: translateX(0) }
+        20%, 60% { transform: translateX(-9px) }
+        40%, 80% { transform: translateX(9px) }
+      }
+
+      @keyframes invalidOutlineFlash {
+        0%, 100% { border-color: #00ff41; box-shadow: -5px 5px 0 #006b1b }
+        18%, 78% { border-color: #ff4545; box-shadow: -5px 5px 0 #721c1c }
+      }
+
+      @keyframes invalidWordFlash {
+        0%, 100% { background: #b8ffc9; color: #020805; border-color: #00a52a }
+        25%, 75% { background: #ff4545; color: #080000; border-color: #ff4545; box-shadow: -5px 5px 0 #721c1c }
+      }
+
+      .word-tiles.invalid .word-tile.required {
+        animation-name: invalidRequiredFlash;
+      }
+
+      @keyframes invalidRequiredFlash {
+        0%, 100% { background: #00ff41; color: #020805 }
+        25%, 75% { background: #ff4545; color: #080000; box-shadow: -5px 5px 0 #721c1c }
+      }
+
+      .bar.invalid .fill {
+        animation: invalidTimerFlash .7s ease-out;
+      }
+
+      @keyframes invalidTimerFlash {
+        0%, 100% { background: #00ff41 }
+        18%, 78% { background: #ff4545; box-shadow: none }
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .word-tile.arriving,
+        .word-tiles.invalid {
+          animation: none;
+        }
+
+        .word-tiles.invalid {
+          border-color: #ff557f;
+        }
+
+        .bar.invalid .fill {
+          background: #ff315f;
+        }
+      }
+
+      .word {
+        font-size: clamp(32px, 7vw, 55px);
+        font-weight: 950;
+        overflow-wrap: anywhere;
+        margin: 15px 0
+      }
+
+      .timer {
+        font-size: 30px;
+        font-weight: 950;
+        margin: 22px 0 12px
+      }
+
+      .bar {
+        height: 12px;
+        background: #574782;
+        border-radius: 20px;
+        overflow: hidden
+      }
+
+      .fill {
+        height: 100%;
+        background: #67eac7;
+        transition: width .3s
+      }
+
+      .players {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px
+      }
+
+      .player {
+        background: #43336f;
+        border: 2px solid transparent;
+        border-radius: 15px;
+        padding: 13px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0
+      }
+
+      .player.active {
+        border-color: #ffe267
+      }
+
+      .player.out {
+        opacity: .4
+      }
+
+      .power-up {
+        width: 100%;
+        color: inherit;
+        text-align: left;
+      }
+
+      .power-up[aria-disabled="true"] {
+        cursor: default;
+      }
+
+      .power-up > span:last-child {
+        display: grid;
+        gap: 3px;
+        min-width: 0;
+      }
+
+      .power-up-wrap {
+        position: relative;
+        margin-top: 10px;
+      }
+
+      .power-preview {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: calc(100% + 8px);
+        z-index: 10;
+        padding: 10px;
+        border: 1px solid var(--amber);
+        background: #010302;
+        color: var(--paper);
+        font-size: 12px;
+        line-height: 1.5;
+        box-shadow: -3px 3px 0 var(--amber-dark);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(4px);
+        transition: opacity .15s, transform .15s, visibility .15s;
+        pointer-events: none;
+      }
+
+      .power-up-wrap:hover .power-preview,
+      .power-up-wrap:focus-within .power-preview {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .word-vote {
+        display: grid;
+        gap: 10px;
+        margin-top: 10px;
+        padding: 13px;
+        border: 2px solid #39ff67;
+        background: var(--surface-raised);
+        box-shadow: -3px 3px 0 #008d24, 0 0 12px #00ff4166;
+        animation: voteAlertPulse 1.1s ease-in-out infinite;
+      }
+
+      @keyframes voteAlertPulse {
+        0%, 100% {
+          border-color: #39ff67;
+          box-shadow: -3px 3px 0 #008d24, 0 0 8px #00ff4144;
+        }
+        50% {
+          border-color: #b8ffc9;
+          box-shadow: -3px 3px 0 #00c934, 0 0 22px #00ff41cc;
+        }
+      }
+
+      .vote-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .avatar {
+        background: #ffa7d4;
+        border-radius: 50%;
+        width: 33px;
+        height: 33px;
+        display: grid;
+        place-items: center;
+        color: #31153d;
+        font-weight: 900;
+        flex-shrink: 0
+      }
+
+      .lives {
+        display: flex;
+        gap: 3px;
+        margin-left: auto;
+        padding-left: 8px;
+        font-family: "Segoe UI Symbol", "Arial Unicode MS", sans-serif;
+        font-size: 21px;
+        line-height: 1;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .muted {
+        color: #c9b9ed;
+        font-size: 13px
+      }
+
+      .notice {
+        background: #49346d;
+        border-radius: 12px;
+        padding: 13px;
+        color: #fff;
+        min-height: 44px
+      }
+
+      .error {
+        background: #7b2d63
+      }
+
+      .hide {
+        display: none !important
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap
+      }
+
+      .row>* {
+        flex: 1
+      }
+
+      h2 {
+        margin: 0 0 16px
+      }
+
+      #game,
+      #lobby {
+        display: grid;
+        gap: 16px
+      }
+
+      #game {
+        width: 100%;
+        margin: auto 0;
+        grid-template-columns: minmax(210px, .8fr) minmax(420px, 1.6fr) minmax(210px, .8fr);
+        grid-template-areas: "players game power";
+        align-items: center;
+      }
+
+      .game-main {
+        grid-area: game;
+      }
+
+      .game-players {
+        grid-area: players;
+      }
+
+      .game-players .players {
+        grid-template-columns: 1fr;
+      }
+
+      .game-tools {
+        grid-area: power;
+        display: grid;
+        gap: 16px;
+        align-content: center;
+      }
+
+      .power-ups,
+      .challenge-panel {
+        text-align: center;
+      }
+
+      .power-placeholder {
+        padding: 24px 12px;
+        border: 2px dashed #6954a6;
+        border-radius: 16px;
+        color: #a99bcc;
+      }
+
+      .result-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .result-players {
+        display: grid;
+        gap: 12px;
+        text-align: left;
+      }
+
+      .result-player {
+        padding: 14px;
+        border: 2px solid transparent;
+        border-radius: 18px;
+        background: #3c2e69;
+      }
+
+      .result-player.winner {
+        border-color: #ffe267;
+      }
+
+      .result-player-name {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+
+      .result-stat {
+        padding: 12px;
+        border-radius: 16px;
+        background: #241b49;
+      }
+
+      .result-stat strong {
+        display: block;
+        margin-top: 5px;
+        color: #ffe267;
+        font-size: 20px;
+      }
+
+      @media(max-width:900px) {
+        #game {
+          grid-template-columns: 1fr;
+          grid-template-areas:
+            "game"
+            "players"
+            "power";
+        }
+      }
+
+      @media(max-width:560px) {
+
+        .grid,
+        .players {
+          grid-template-columns: 1fr
+        }
+
+        .room-choice {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .panel {
+          padding: 19px
+        }
+
+        .letter {
+          width: 76px;
+          height: 76px;
+          font-size: 50px
+        }
+
+        .row>* {
+          flex-basis: 100%
+        }
+      }
+
+      /* Terminal-inspired visual system */
+      :root {
+        font-family: "Pixelify Sans", "Lucida Console", "Courier New", ui-monospace, monospace;
+        color: #b8ffc9;
+        background: #020403;
+        --ink: #020403;
+        --surface: #050907;
+        --surface-raised: #08110c;
+        --line: #00a52a;
+        --paper: #b8ffc9;
+        --amber: #00ff41;
+        --amber-dark: #006b1b;
+        --cyan: #00ff41;
+        --red: #ff4545;
+        --dim: #47c968;
+      }
+
+      body {
+        background-color: var(--ink);
+        background-image:
+          linear-gradient(#007a2055 1px, transparent 1px),
+          linear-gradient(90deg, #007a2055 1px, transparent 1px);
+        background-size: 32px 32px;
+        animation: gridDrift 1.5s linear infinite;
+      }
+
+      @keyframes gridDrift {
+        from { background-position: 0 0 }
+        to { background-position: 32px 32px }
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background:
+          repeating-linear-gradient(0deg, #0000 0 3px, #00ff4109 3px 4px),
+          linear-gradient(180deg, #02040300 0%, #020403d9 100%);
+      }
+
+      .wrap {
+        padding: 32px 20px;
+      }
+
+      .panel {
+        position: relative;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 0;
+        padding: 25px;
+        box-shadow: -8px 8px 0 #000;
+      }
+
+      .hero {
+        font-family: "Pixelify Sans", "Lucida Console", monospace;
+        color: var(--paper);
+        font-weight: 700;
+        letter-spacing: -.04em;
+        text-shadow: -3px 3px 0 #006b1b;
+      }
+
+      .hero::before {
+        content: ">";
+        color: var(--amber);
+      }
+
+      .accent,
+      .result-stat strong {
+        color: var(--amber);
+      }
+
+      .sub,
+      .muted {
+        color: var(--dim);
+      }
+
+      .label,
+      label,
+      h2 {
+        font-family: "Pixelify Sans", "Lucida Console", monospace;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+      }
+
+      input,
+      select {
+        background: #010302;
+        color: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 0;
+        caret-color: var(--amber);
+      }
+
+      #home input {
+        background: #010302;
+        color: var(--paper);
+        border-color: var(--line);
+      }
+
+      #home input::placeholder,
+      input::placeholder {
+        color: #477358;
+      }
+
+      input:focus,
+      select:focus,
+      button:focus-visible {
+        outline: 2px solid var(--cyan);
+        outline-offset: 3px;
+      }
+
+      button {
+        font-family: "Pixelify Sans", "Lucida Console", monospace;
+        border: 1px solid currentColor;
+        border-radius: 0;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        box-shadow: -4px 4px 0 #000;
+        transition: transform .1s, box-shadow .1s, background-color .1s;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translate(1px, -1px);
+        filter: none;
+        box-shadow: -6px 6px 0 #000;
+      }
+
+      button:active:not(:disabled) {
+        transform: translate(-3px, 3px);
+        box-shadow: -1px 1px 0 #000;
+      }
+
+      .yellow {
+        background: var(--amber);
+        color: #020805;
+      }
+
+      .pink {
+        background: var(--amber);
+        color: #020805;
+      }
+
+      .room-choice button {
+        background: #010302;
+        color: var(--amber);
+        border: 1px solid var(--amber);
+      }
+
+      .room-choice button.selected {
+        background: var(--amber);
+        color: #020805;
+      }
+
+      .purple,
+      .ghost {
+        background: #0b2113;
+        color: var(--paper);
+      }
+
+      .word-tiles {
+        border: 1px solid var(--line);
+        border-radius: 0;
+        background: #010302;
+        box-shadow: inset 0 0 0 4px #07120a;
+      }
+
+      .word-tiles.my-turn {
+        border-color: var(--cyan);
+        box-shadow: inset 0 0 0 4px #07120a, -5px 5px 0 #006b1b;
+      }
+
+      .letter,
+      .letter-choice,
+      .word-tile {
+        font-family: "Press Start 2P", "Lucida Console", monospace;
+        border-radius: 0;
+        background: var(--paper);
+        color: #020805;
+        box-shadow: -5px 5px 0 #00a52a;
+      }
+
+      .letter,
+      .letter-choice,
+      .word-tile.required {
+        background: var(--amber);
+        color: #020805;
+        box-shadow: -5px 5px 0 var(--amber-dark);
+      }
+
+      .word-tile.cursor {
+        width: clamp(22px, 4vw, 32px);
+        background: var(--cyan);
+        border: 0;
+        box-shadow: none;
+        animation: cursorPulse 1s step-end infinite;
+      }
+
+      #roomCode {
+        font-family: "Press Start 2P", "Lucida Console", monospace;
+        font-size: clamp(28px, 7vw, 52px);
+        letter-spacing: .08em;
+        line-height: 1.2;
+        margin: 8px 0 14px;
+      }
+
+      .bar {
+        height: 14px;
+        padding: 2px;
+        border: 1px solid var(--line);
+        border-radius: 0;
+        background: #010302;
+      }
+
+      .fill {
+        background: var(--cyan);
+      }
+
+      .player,
+      .notice,
+      .power-placeholder,
+      .result-player,
+      .result-stat {
+        border-radius: 0;
+      }
+
+      .player {
+        background: var(--surface-raised);
+        border: 1px solid #00751e;
+      }
+
+      .player.active,
+      .result-player.winner {
+        border-color: var(--amber);
+        box-shadow: -3px 3px 0 var(--amber-dark);
+      }
+
+      .avatar {
+        border-radius: 0;
+        background: var(--cyan);
+        color: #020805;
+      }
+
+      .notice {
+        border-left: 4px solid var(--cyan);
+        background: #08170e;
+      }
+
+      .error {
+        border-color: var(--red);
+        background: #182008;
+      }
+
+      .power-placeholder {
+        border-color: var(--line);
+        color: var(--dim);
+      }
+
+      .result-player {
+        background: var(--surface-raised);
+      }
+
+      .result-stat {
+        background: #010302;
+        border: 1px solid #00751e;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        body {
+          animation: none;
+        }
+
+        .game-main.invalid {
+          animation: none;
+          border-color: var(--red);
+        }
+
+        .word-vote {
+          animation: none;
+          border-color: #b8ffc9;
+          box-shadow: -3px 3px 0 #00c934, 0 0 16px #00ff4188;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <div id="connection" class="sr-only">Ready</div>
+      <section id="home" class="panel stack">
+        <div class="center">
+          <div class="hero">WORD CHAIN</div>
+        </div>
+        <div class="grid room-choice"><button id="showCreate" class="yellow" aria-pressed="false">Create Room</button><button id="showJoin" class="pink" aria-pressed="false">Join Room</button></div>
+        <div id="playerSetup" class="stack hide">
+          <div id="setupFields" class="setup-fields">
+            <div class="stack"><label for="name">Your nickname</label><input id="name" maxlength="12" placeholder="Enter your name" autocomplete="nickname"></div>
+            <div id="codeField" class="stack hide"><label for="code">4-letter room code</label><input id="code" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase"></div>
+          </div>
+          <div id="createBox" class="stack hide"><button id="create" class="yellow">Create Room →</button></div>
+          <div id="joinBox" class="stack hide"><button id="join" class="pink">Join Room →</button></div>
+        </div>
+        <div id="homeMsg" class="notice hide" role="alert"></div>
+      </section>
+      <section id="lobby" class="hide">
+        <div class="panel center stack lobby-room">
+          <div class="muted">YOUR ROOM CODE</div>
+          <div class="hero accent" id="roomCode">----</div><button id="leaveRoom" class="ghost small">Leave Room</button>
+          <button id="start" class="yellow">Start Game</button>
+        </div>
+        <div class="panel lobby-room">
+          <h2>Players <span id="lobbyCount" class="muted"></span></h2>
+          <div class="players" id="lobbyPlayers"></div>
+        </div>
+      </section>
+      <section id="game" class="hide">
+        <div class="panel center game-main">
+          <div class="muted" id="lastWordLabel">LAST WORD: —</div>
+          <div class="word" id="lastWord">WAITING…</div>
+          <div class="sub" id="wordPrompt">Next word must start with</div>
+          <div id="wordTiles" class="word-tiles disabled" role="textbox" aria-label="Your word" aria-readonly="true"></div>
+          <div id="letterChoices" class="letter-choices hide" aria-label="Choose a starting letter"></div>
+          <input id="keyboardCapture" class="keyboard-capture" type="text" inputmode="text" enterkeyhint="send" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="Type your word">
+          <div class="timer" id="timer">00:15</div>
+          <div class="bar" id="timerBar">
+            <div class="fill" id="timerFill"></div>
+          </div>
+          <div id="gameMsg" class="sr-only" role="status" aria-live="polite"></div>
+        </div>
+        <div class="panel game-players">
+          <h2>Players</h2>
+          <div class="players" id="gamePlayers"></div>
+        </div>
+        <div class="game-tools">
+          <div class="panel challenge-panel">
+            <h2>Word Challenge</h2>
+            <div id="challengeWrap" class="power-up-wrap">
+              <button id="challengeWord" class="player power-up" type="button" disabled>
+                <span class="avatar" aria-hidden="true">!</span>
+                <span><strong>Challenge Word</strong><span id="challengeStatus" class="muted">Available after a rejected word</span></span>
+              </button>
+              <div class="power-preview" role="tooltip">Ask the room to accept a rejected word. Voting lasts 15 seconds; approval needs a strict majority, but rejection costs one life.</div>
+            </div>
+            <div id="wordVotePanel" class="word-vote hide">
+              <strong id="voteWord"></strong>
+              <span id="voteStatus" class="muted"></span>
+              <div class="vote-actions"><button id="voteYes" class="yellow" type="button">Yes</button><button id="voteNo" class="ghost" type="button">No</button></div>
+            </div>
+          </div>
+          <div class="panel power-ups">
+            <h2>Power Ups</h2>
+            <div class="power-up-wrap">
+              <button id="hintPower" class="player power-up" type="button" aria-disabled="true">
+                <span class="avatar" aria-hidden="true">?</span>
+                <span><strong>Hint</strong><span id="hintStatus" class="muted">0/3 words charged</span></span>
+              </button>
+              <div class="power-preview" role="tooltip">After three accepted words, reveal your prefix plus the next three letters of a random unused word.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="winner" class="panel center stack hide">
+        <div class="hero accent">GAME OVER!</div>
+        <h2 id="winnerName"></h2>
+        <div id="resultsPlayers" class="result-players"></div>
+        <button id="again" class="yellow">Return to Lobby</button>
+      </section>
+    </main>
+    <script type="module">
+      // Paste your Firebase web app config below. See README.md.
+      const firebaseConfig = {
+        apiKey: "AIzaSyDJoG2-forvs8vCjf7EFApuyt_Z8vubPkQ",
+        authDomain: "lettergame-8ef4b.firebaseapp.com",
+        databaseURL: "https://lettergame-8ef4b-default-rtdb.firebaseio.com/",
+        projectId: "lettergame-8ef4b",
+        appId: "1:277755176198:web:be30aa3714680548e8aa87"
+      };
+      const $ = id => document.getElementById(id);
+      let db, ref, get, set, update, runTransaction, onValue, onDisconnect, serverTimestamp, roomId = null,
+        playerId = localStorage.getItem('ll_player') || sessionStorage.getItem('ll_player') || crypto.randomUUID(),
+        devMode = false,
+        devPlayerId = '',
+        room = null,
+        offset = 0,
+        unsubscribe = null,
+        disconnectRegistration = null,
+        disconnectMode = '',
+        expiringRoom = false,
+        leavingRoom = false,
+        checking = false,
+        typedLetters = '',
+        typingTurn = '',
+        invalidAnimationTimer = null,
+        draftPublishTimer = null,
+        renderedTileTurn = '',
+        renderedTileLetters = '',
+        timerErrorUntil = 0,
+        timerErrorText = '',
+        hintText = '',
+        hintTurn = '',
+        hintLoading = false,
+        appealWord = '',
+        appealTurn = '',
+        voteResolving = false,
+        homeLoadingAction = '',
+        homeLoadingTimer = null,
+        lobbyLayoutAnimation = null;
+      localStorage.setItem('ll_player', playerId);
+      sessionStorage.setItem('ll_player', playerId);
+      $('name').value = (localStorage.getItem('ll_name') || '').slice(0, 12);
+      const LOBBY_LIFETIME = 10 * 60 * 1000;
+      const TURN_SUBMISSION_GRACE = 500;
+      const TURN_EXPIRY_BUFFER = 300;
+      const HINT_COOLDOWN_TURNS = 3;
+      const MIN_TWO_LETTER_WORDS = 5;
+      const WORD_VOTE_DURATION = 15000;
+
+      function lobbyDeadline(r) {
+        return r?.lobbyExpiresAt || ((r?.created || 0) + LOBBY_LIFETIME)
+      }
+      const sections = ['home', 'lobby', 'game', 'winner'];
+      // Load the local dictionary once. Keep the game offline from third-party word APIs.
+      let dictionaryPromise,
+        dictionaryPrefixCounts = new Map();
+      function loadDictionary() {
+        if (!dictionaryPromise) {
+          dictionaryPromise = fetch(new URL('./words.json', import.meta.url))
+            .then(response => {
+              if (!response.ok) throw new Error('Dictionary file missing (HTTP ' + response.status + ').');
+              return response.json();
+            })
+            .then(words => {
+              dictionaryPrefixCounts = new Map();
+              for (const word of words) {
+                if (word.length < 2) continue;
+                for (const prefix of [word.slice(0, 1), word.slice(0, 2)]) {
+                  dictionaryPrefixCounts.set(prefix, (dictionaryPrefixCounts.get(prefix) || 0) + 1)
+                }
+              }
+              return new Set(words)
+            });
+        }
+        return dictionaryPromise;
+      }
+      loadDictionary().catch(error => console.warn('Dictionary loading failed:', error));
+
+
+      function show(id) {
+        sections.forEach(x => $(x).classList.toggle('hide', x !== id))
+      }
+
+      function message(id, s, bad = false) {
+        const e = $(id);
+        e.textContent = s;
+        e.classList.remove('hide');
+        e.classList.toggle('error', bad)
+      }
+
+      function beginHomeLoading(action) {
+        if (homeLoadingAction) return false;
+        homeLoadingAction = action;
+        const button = $(action);
+        const label = action === 'create' ? 'Creating room' : 'Joining room';
+        let dots = 1;
+        button.disabled = true;
+        button.textContent = label + '.';
+        homeLoadingTimer = setInterval(() => {
+          dots = dots % 3 + 1;
+          button.textContent = label + '.'.repeat(dots)
+        }, 400);
+        return true
+      }
+
+      function endHomeLoading(action) {
+        if (homeLoadingAction !== action) return;
+        clearInterval(homeLoadingTimer);
+        homeLoadingTimer = null;
+        homeLoadingAction = '';
+        const button = $(action);
+        button.disabled = false;
+        button.textContent = action === 'create' ? 'Create Room →' : 'Join Room →'
+      }
+
+      function nickname() {
+        const s = $('name').value.trim().replace(/[<>]/g, '').slice(0, 12);
+        if (!s) {
+          message('homeMsg', 'Please enter a nickname.', true);
+          return null
+        }
+        localStorage.setItem('ll_name', s);
+        return s
+      }
+
+      function players(r) {
+        return Object.entries(r?.players || {}).sort((a, b) => a[1].joined - b[1].joined)
+      }
+
+      function code() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        return Array.from(crypto.getRandomValues(new Uint8Array(4)), n => chars[n % chars.length]).join('')
+      }
+
+      function isHost(r) {
+        return r?.host === playerId
+      }
+
+      function actingPlayerId(r = room) {
+        return devMode ? r?.turn : playerId
+      }
+
+      function controlsPlayer(id) {
+        return id === playerId || devMode && id === devPlayerId
+      }
+
+      function validConfig() {
+        return firebaseConfig.apiKey !== 'PASTE_API_KEY' && !firebaseConfig.databaseURL.includes('PASTE_PROJECT_ID')
+      }
+      async function init() {
+        if (!validConfig()) {
+          message('homeMsg', 'Firebase setup required. Add your Firebase config to index.html (see README.md).', true);
+          $('connection').textContent = '● Setup needed';
+          return false
+        }
+        if (db) return true;
+        try {
+          const appMod = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js');
+          const dbMod = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js');
+          const app = appMod.initializeApp(firebaseConfig);
+          db = dbMod.getDatabase(app);
+          ({
+            ref,
+            get,
+            set,
+            update,
+            runTransaction,
+            onValue,
+            onDisconnect,
+            serverTimestamp
+          } = dbMod);
+          onValue(ref(db, '.info/serverTimeOffset'), s => {
+            offset = s.val() || 0
+          });
+          onValue(ref(db, '.info/connected'), s => {
+            if (s.val()) markPlayerConnected()
+          });
+          $('connection').textContent = '● Connected';
+          return true
+        } catch (e) {
+          message('homeMsg', 'Firebase connection failed: ' + e.message, true);
+          return false
+        }
+      }
+      async function create() {
+        const n = nickname();
+        if (!n || !beginHomeLoading('create')) return;
+        try {
+          if (!await init()) return;
+          devMode = false;
+          devPlayerId = '';
+          let c;
+          for (let i = 0; i < 8; i++) {
+            c = code();
+            const now = Date.now() + offset;
+            const result = await runTransaction(ref(db, 'rooms/' + c), current =>
+              current === null || current.status === 'lobby' && now >= lobbyDeadline(current) ? {
+              host: playerId,
+              status: 'lobby',
+              created: now,
+              lobbyExpiresAt: now + LOBBY_LIFETIME,
+              duration: 15,
+              players: {
+                [playerId]: {
+                  name: n,
+                  joined: Date.now() + offset,
+                  alive: true,
+                  lives: 2,
+                  connected: true
+                }
+              }
+            } : undefined, {
+              applyLocally: false
+            });
+            if (result.committed) {
+              enter(c);
+              return
+            }
+          }
+          throw Error('Could not create a unique room')
+        } catch (e) {
+          message('homeMsg', e.message, true)
+        } finally {
+          endHomeLoading('create')
+        }
+      }
+      async function join() {
+        const n = nickname();
+        if (!n || homeLoadingAction) return;
+
+        const c = $('code').value.trim().toUpperCase();
+
+        if (c !== 'DEV' && !/^[A-Z]{4}$/.test(c)) {
+          message('homeMsg', 'Room codes are four letters.', true);
+          return;
+        }
+
+        if (!beginHomeLoading('join')) return;
+
+        try {
+          if (!await init()) return;
+
+          if (c === 'DEV') {
+            await createDevGame(n);
+            return
+          }
+
+          devMode = false;
+          devPlayerId = '';
+
+          const roomRef = ref(db, 'rooms/' + c);
+          const snapshot = await get(roomRef);
+
+          if (!snapshot.exists()) {
+            throw Error('Room does not exist in Firebase.');
+          }
+
+          const current = snapshot.val();
+          const now = Date.now() + offset;
+
+          if (current.status === 'lobby' && now >= lobbyDeadline(current)) {
+            await runTransaction(roomRef, r => {
+              if (!r) return r;
+              return r.status === 'lobby' && now >= lobbyDeadline(r) ? null : r;
+            }, { applyLocally: false });
+            throw Error('Lobby expired because its game did not start within 10 minutes.');
+          }
+
+          const returningPlayer = Boolean(current.players?.[playerId]);
+
+          if (current.status === 'playing' && !returningPlayer) {
+            throw Error('Room has already started.');
+          }
+
+          if (!['lobby', 'playing', 'finished'].includes(current.status)) {
+            throw Error('Room is not available to join.');
+          }
+
+          if (!returningPlayer && Object.keys(current.players || {}).length >= 10) {
+            throw Error('Room is full.');
+          }
+
+          const result = await runTransaction(roomRef, r => {
+            if (r === null) {
+              return r;
+            }
+
+            const returningPlayer = Boolean(r.players?.[playerId]);
+
+            if (r.status === 'playing' && !returningPlayer) {
+              return;
+            }
+
+            if (!['lobby', 'playing', 'finished'].includes(r.status)) {
+              return;
+            }
+
+            if (r.players?.[playerId]) {
+              r.players[playerId].connected = true;
+              return r;
+            }
+
+            if (Object.keys(r.players || {}).length >= 10) return;
+
+            r.players = {
+              ...r.players,
+              [playerId]: {
+                name: n,
+                joined: Date.now() + offset,
+                alive: true,
+                lives: 2,
+                connected: true
+              }
+            };
+            return r;
+          }, { applyLocally: false });
+
+          if (!result.committed) {
+            throw Error('Join transaction was rejected.');
+          }
+
+          enter(c);
+
+        } catch (e) {
+          console.error('JOIN ERROR:', e);
+          message('homeMsg', e.message, true);
+        } finally {
+          endHomeLoading('join')
+        }
+      }
+
+      async function createDevGame(name) {
+        try {
+          await loadDictionary();
+          devMode = true;
+          devPlayerId = playerId + '-dev-opponent';
+          const now = Date.now() + offset;
+          const openingLetters = randomOpeningLetters();
+          const order = [playerId, devPlayerId];
+          const devRoom = {
+            host: playerId,
+            status: 'playing',
+            created: now,
+            duration: 15,
+            players: {
+              [playerId]: { name: name + ' 1', joined: now, alive: true, lives: 2, connected: true },
+              [devPlayerId]: { name: name + ' 2', joined: now + 1, alive: true, lives: 2, connected: true }
+            },
+            order,
+            turn: playerId,
+            lastWord: '',
+            requiredPrefix: '',
+            openingChoice: true,
+            openingRecipientSelf: true,
+            openingLetters,
+            words: [],
+            draft: '',
+            draftPlayer: '',
+            draftTurn: 1,
+            turnNumber: 1,
+            turnMistakes: 0,
+            mistakePulse: 0,
+            stats: { words: 0, totalTimeMs: 0, totalWordLength: 0 },
+            playerStats: Object.fromEntries(order.map(id => [id, { words: 0, totalTimeMs: 0, totalWordLength: 0 }])),
+            powerUps: Object.fromEntries(order.map(id => [id, { hintCharge: 0 }])),
+            turnStartedAt: now,
+            deadline: now + 15000
+          };
+          let devRoomId = '';
+          for (let attempt = 0; attempt < 8; attempt++) {
+            const candidate = code();
+            const result = await runTransaction(ref(db, 'rooms/' + candidate), current =>
+              current === null ? devRoom : undefined, { applyLocally: false });
+            if (result.committed) {
+              devRoomId = candidate;
+              break
+            }
+          }
+          if (!devRoomId) throw Error('Could not create a unique dev room.');
+          enter(devRoomId, 'DEV')
+        } catch (error) {
+          devMode = false;
+          devPlayerId = '';
+          message('homeMsg', 'Could not start dev mode: ' + error.message, true)
+        }
+      }
+
+      function enter(c, urlCode = c) {
+        roomId = c;
+        history.replaceState(null, '', location.pathname + '?room=' + urlCode);
+        unsubscribe?.();
+        unsubscribe = onValue(ref(db, 'rooms/' + c), snap => {
+          const nextRoom = snap.val();
+          if (!nextRoom) {
+            if (leavingRoom) {
+              finishLeavingRoom();
+              return
+            }
+            const expired = room?.status === 'lobby' && Date.now() + offset >= lobbyDeadline(room);
+            disconnectRegistration?.cancel().catch(() => {});
+            disconnectRegistration = null;
+            disconnectMode = '';
+            room = null;
+            roomId = null;
+            devMode = false;
+            devPlayerId = '';
+            unsubscribe?.();
+            unsubscribe = null;
+            history.replaceState(null, '', location.pathname);
+            message('homeMsg', expired ? 'Lobby closed because its game did not start within 10 minutes.' : 'Room no longer exists.', true);
+            show('home');
+            return
+          }
+          const mistakeHappened = room?.status === 'playing' && nextRoom.status === 'playing' &&
+            (nextRoom.mistakePulse || 0) > (room.mistakePulse || 0);
+          room = nextRoom;
+          syncDisconnectBehavior(nextRoom);
+          repairWaitingRoom(nextRoom);
+          render();
+          if (mistakeHappened) requestAnimationFrame(() => flashInvalidWord())
+        });
+      }
+
+      async function syncDisconnectBehavior(r) {
+        const hasPlayer = Boolean(r.players?.[playerId]);
+        const nextMode = !hasPlayer ? 'none' : r.status === 'lobby' ? 'remove' : 'offline';
+        if (disconnectMode === nextMode) return;
+        disconnectMode = nextMode;
+        try {
+          if (disconnectRegistration) await disconnectRegistration.cancel();
+          disconnectRegistration = null;
+          if (hasPlayer && roomId) {
+            disconnectRegistration = onDisconnect(ref(db, `rooms/${roomId}/players/${playerId}`));
+            if (nextMode === 'remove') await disconnectRegistration.remove();
+            else await disconnectRegistration.update({ connected: false });
+          }
+        } catch (error) {
+          console.warn('Could not configure disconnect behavior:', error)
+        }
+      }
+
+      async function markPlayerConnected() {
+        if (!db || !roomId) return;
+        try {
+          await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r?.players?.[playerId]) return;
+            if (r.players[playerId].connected === true) return r;
+            r.players[playerId].connected = true;
+            return r
+          }, { applyLocally: false })
+        } catch (error) {
+          console.warn('Could not restore player presence:', error)
+        }
+      }
+
+      async function repairWaitingRoom(r) {
+        if (!roomId || r.status === 'playing' || r.players?.[r.host]) return;
+        try {
+          await runTransaction(ref(db, 'rooms/' + roomId), current => {
+            if (!current || current.status === 'playing' || current.players?.[current.host]) return;
+            const remaining = players(current);
+            if (!remaining.length) return current;
+            current.host = remaining[0][0];
+            return current;
+          }, { applyLocally: false })
+        } catch (error) {
+          console.warn('Could not reassign room host:', error)
+        }
+      }
+
+      function finishLeavingRoom() {
+        unsubscribe?.();
+        unsubscribe = null;
+        disconnectRegistration?.cancel().catch(() => {});
+        disconnectRegistration = null;
+        disconnectMode = '';
+        room = null;
+        roomId = null;
+        devMode = false;
+        devPlayerId = '';
+        leavingRoom = false;
+        history.replaceState(null, '', location.pathname);
+        $('homeMsg').classList.add('hide');
+        show('home')
+      }
+
+      async function leaveLobby() {
+        if (!roomId || room?.status !== 'lobby' || leavingRoom) return;
+        const leavingIds = devMode ? [playerId, devPlayerId] : [playerId];
+        leavingRoom = true;
+        try {
+          if (disconnectRegistration) await disconnectRegistration.cancel();
+          disconnectRegistration = null;
+          disconnectMode = '';
+          const result = await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'lobby') return;
+            for (const id of leavingIds) {
+              delete r.players?.[id];
+              if (r.powerUps) delete r.powerUps[id];
+              if (r.playerStats) delete r.playerStats[id]
+            }
+            const remaining = players(r);
+            if (!remaining.length) return null;
+            if (!r.players?.[r.host]) r.host = remaining[0][0];
+            return r
+          }, { applyLocally: false });
+          if (!result.committed) throw Error('Leave transaction was rejected.');
+          finishLeavingRoom()
+        } catch (error) {
+          leavingRoom = false;
+          syncDisconnectBehavior(room);
+          $('leaveRoom').textContent = 'Could not leave — try again';
+          console.warn('Could not leave room:', error)
+        }
+      }
+
+      function renderPlayers(id, r) {
+        const container = $(id);
+        const lobby = id === 'lobbyPlayers' ? $('lobby') : null;
+        const animateCentering = lobby && lobby.dataset.centered === 'true' &&
+          !matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (animateCentering) lobbyLayoutAnimation?.cancel();
+        const previousTop = animateCentering ? lobby.getBoundingClientRect().top : 0;
+        container.replaceChildren();
+        for (const [pid, p] of players(r)) {
+          const e = document.createElement('div');
+          e.className = 'player' + (r.status === 'playing' && r.turn === pid ? ' active' : '') + (!p.alive ? ' out' : '');
+          const a = document.createElement('div');
+          a.className = 'avatar';
+          a.textContent = p.name.slice(0, 1).toUpperCase();
+          const t = document.createElement('div');
+          const name = document.createElement('strong');
+          name.textContent = p.name + (controlsPlayer(pid) ? ' (You)' : '');
+          const state = document.createElement('div');
+          state.className = 'muted';
+          const lives = p.lives ?? 2;
+          state.textContent = !p.alive ? 'Eliminated' : r.status === 'playing' ?
+            (r.turn === pid ? 'Playing now' : 'Waiting') :
+            pid === r.host ? 'Host' : 'Ready';
+          const hearts = document.createElement('div');
+          hearts.className = 'lives';
+          hearts.setAttribute('aria-label', `${lives} ${lives === 1 ? 'life' : 'lives'} remaining`);
+          for (let index = 0; index < lives; index++) {
+            const heart = document.createElement('span');
+            heart.setAttribute('aria-hidden', 'true');
+            heart.textContent = '\u2665\uFE0E';
+            hearts.append(heart)
+          }
+          t.append(name, state);
+          e.append(a, t, hearts);
+          container.append(e)
+        }
+        if (lobby) {
+          if (animateCentering) {
+            const centeredTop = lobby.getBoundingClientRect().top;
+            const distance = previousTop - centeredTop;
+            if (Math.abs(distance) > .5) {
+              lobbyLayoutAnimation = lobby.animate([
+                { transform: `translateY(${distance}px)` },
+                { transform: 'translateY(0)' }
+              ], {
+                duration: 350,
+                easing: 'cubic-bezier(.22,.8,.3,1)'
+              })
+            }
+          }
+          lobby.dataset.centered = 'true'
+        }
+      }
+
+      function renderResults(r) {
+        const container = $('resultsPlayers');
+        container.replaceChildren();
+        const orderedPlayers = players(r).sort(([firstId], [secondId]) =>
+          Number(secondId === r.winner) - Number(firstId === r.winner));
+        for (const [pid, player] of orderedPlayers) {
+          const stats = r.playerStats?.[pid] || {
+            words: 0,
+            totalTimeMs: 0,
+            totalWordLength: 0
+          };
+          const card = document.createElement('div');
+          card.className = 'result-player' + (pid === r.winner ? ' winner' : '');
+          const heading = document.createElement('div');
+          heading.className = 'result-player-name';
+          const name = document.createElement('strong');
+          name.textContent = player.name + (controlsPlayer(pid) ? ' (You)' : '');
+          const placement = document.createElement('span');
+          placement.textContent = pid === r.winner ? 'Winner' : '';
+          heading.append(name, placement);
+          const statGrid = document.createElement('div');
+          statGrid.className = 'result-stats';
+          const values = [
+            ['AVERAGE TIME', stats.words ? (stats.totalTimeMs / stats.words / 1000).toFixed(1) + 's' : '—'],
+            ['AVERAGE WORD', stats.words ? (stats.totalWordLength / stats.words).toFixed(1) + ' letters' : '—'],
+            ['WORDS SUBMITTED', String(stats.words || 0)]
+          ];
+          for (const [label, value] of values) {
+            const stat = document.createElement('div');
+            stat.className = 'result-stat';
+            const statLabel = document.createElement('span');
+            statLabel.className = 'muted';
+            statLabel.textContent = label;
+            const statValue = document.createElement('strong');
+            statValue.textContent = value;
+            stat.append(statLabel, statValue);
+            statGrid.append(stat)
+          }
+          card.append(heading, statGrid);
+          container.append(card)
+        }
+      }
+
+      function prefixForRoom(r) {
+        if (!r) return '';
+        if (typeof r.requiredPrefix === 'string') return r.requiredPrefix.toLowerCase();
+        return r.lastWord?.slice(-1).toLowerCase() || ''
+      }
+
+      function requiredLetter() {
+        return prefixForRoom(room)
+      }
+
+      function hintState(r, id) {
+        return r?.powerUps?.[id] || { hintCharge: 0 }
+      }
+
+      function chargeHintAfterWord(r, id) {
+        r.powerUps = r.powerUps || {};
+        const power = r.powerUps[id] || { hintCharge: 0 };
+        power.hintCharge = Math.min(HINT_COOLDOWN_TURNS, (power.hintCharge || 0) + 1);
+        r.powerUps[id] = power
+      }
+
+      function renderPowerUps() {
+        const actor = actingPlayerId();
+        const charge = hintState(room, actor).hintCharge || 0;
+        const ready = charge >= HINT_COOLDOWN_TURNS;
+        const usable = ready && isMyTurn() && !hintLoading;
+        const turnKey = `${room?.turn || ''}:${room?.turnNumber || 0}`;
+        $('hintPower').classList.toggle('active', ready);
+        $('hintPower').setAttribute('aria-disabled', String(!usable));
+        $('hintStatus').textContent = hintTurn === turnKey && hintText ? `HINT > ${hintText}` :
+          hintLoading ? 'Searching dictionary…' :
+          ready ? (isMyTurn() ? 'Ready — tap to use' : 'Ready for your turn') :
+          `${charge}/${HINT_COOLDOWN_TURNS} words charged`;
+        renderWordVote()
+      }
+
+      function localVoterId(vote) {
+        const controlled = devMode ? [playerId, devPlayerId] : [playerId];
+        return controlled.find(id => (vote?.voterIds || []).includes(id) && vote.votes?.[id] === undefined) || ''
+      }
+
+      function renderWordVote() {
+        const vote = room?.wordVote;
+        const actor = actingPlayerId();
+        const currentTurnKey = `${actor}:${room?.turnNumber || 0}`;
+        const canChallenge = Boolean(!vote && isMyTurn() && appealWord && appealTurn === currentTurnKey);
+        $('challengeWord').disabled = !canChallenge;
+        $('challengeWord').classList.toggle('active', canChallenge);
+        $('challengeStatus').textContent = vote
+          ? 'Vote in progress'
+          : canChallenge
+            ? `Appeal “${appealWord.toUpperCase()}”`
+            : 'Available after a rejected word';
+        $('wordVotePanel').classList.toggle('hide', !vote);
+        if (!vote) return;
+        const votes = vote.votes || {};
+        const voterIds = vote.voterIds || [];
+        const yesVotes = voterIds.filter(id => votes[id] === true).length;
+        const required = Math.floor(voterIds.length / 2) + 1;
+        const remaining = Math.max(0, vote.deadline - Date.now() - offset);
+        const voter = localVoterId(vote);
+        $('voteWord').textContent = `IS “${vote.word.toUpperCase()}” A WORD?`;
+        $('voteStatus').textContent = `${Math.ceil(remaining / 1000)}s • ${yesVotes}/${required} yes votes`;
+        $('voteYes').disabled = !voter || voteResolving;
+        $('voteNo').disabled = !voter || voteResolving
+      }
+
+      function unusedPrefixCount(prefix, usedWords) {
+        const total = dictionaryPrefixCounts.get(prefix) || 0;
+        if (!total) return 0;
+        let used = 0;
+        for (const word of usedWords || []) {
+          if (word.startsWith(prefix)) used++
+        }
+        return Math.max(0, total - used)
+      }
+
+      function hasUnusedPrefix(prefix, usedWords) {
+        return unusedPrefixCount(prefix, usedWords) > 0
+      }
+
+      function randomPlayablePair(usedWords) {
+        const usedCounts = new Map();
+        for (const word of usedWords || []) {
+          const prefix = word.slice(0, 2);
+          usedCounts.set(prefix, (usedCounts.get(prefix) || 0) + 1)
+        }
+        const choices = [];
+        for (const [prefix, total] of dictionaryPrefixCounts) {
+          if (prefix.length === 2 && prefix !== 'xx' && total - (usedCounts.get(prefix) || 0) >= MIN_TWO_LETTER_WORDS) choices.push(prefix)
+        }
+        if (!choices.length) return '';
+        const random = crypto.getRandomValues(new Uint32Array(1))[0];
+        return choices[random % choices.length]
+      }
+
+      function randomOpeningLetters(usedWords = []) {
+        const choices = [...'abcdefghijklmnopqrstuvwxyz'].filter(letter => hasUnusedPrefix(letter, usedWords));
+        for (let index = choices.length - 1; index > 0; index--) {
+          const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % (index + 1);
+          [choices[index], choices[randomIndex]] = [choices[randomIndex], choices[index]]
+        }
+        return choices.slice(0, 4)
+      }
+
+      function chooseNextPrefix(word, usedWords) {
+        const twoLetters = word.slice(-2);
+        const pairIsPlayable = twoLetters.length === 2 && twoLetters !== 'xx' &&
+          unusedPrefixCount(twoLetters, usedWords) >= MIN_TWO_LETTER_WORDS;
+        const completedWords = usedWords?.length || 0;
+        const progression = Math.min(1, Math.max(0, completedWords - 1) / 149);
+        const twoLetterChance = .1 + progression * .8;
+        const randomValue = crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
+        if (pairIsPlayable && randomValue < twoLetterChance) return twoLetters;
+        const oneLetter = word.slice(-1);
+        if (hasUnusedPrefix(oneLetter, usedWords)) return oneLetter;
+        if (pairIsPlayable) return twoLetters;
+        const randomPair = randomPlayablePair(usedWords);
+        if (randomPair) return randomPair;
+        return ''
+      }
+
+      function isMyTurn() {
+        const actor = actingPlayerId();
+        return room?.status === 'playing' && !room.wordVote && !room.openingChoice &&
+          room.turn === actor && room.players?.[actor]?.alive
+      }
+
+
+      function nextAlivePlayer(r, current) {
+        const oldIndex = r.order.indexOf(current);
+        return r.order.slice(oldIndex + 1).concat(r.order.slice(0, oldIndex)).find(id => r.players[id]?.alive)
+      }
+
+      function focusKeyboard() {
+        try {
+          $('keyboardCapture').focus({ preventScroll: true })
+        } catch {
+          $('keyboardCapture').focus()
+        }
+      }
+
+      function renderWordTiles(myTurn = room?.turn === actingPlayerId() && room?.players?.[actingPlayerId()]?.alive) {
+        const container = $('wordTiles');
+        const required = requiredLetter();
+        const visibleLetters = myTurn ? typedLetters :
+          room?.draftTurn === room?.turnNumber && room?.draftPlayer === room?.turn ? (room.draft || '') : '';
+        const turnKey = `${room?.turn || ''}:${room?.turnNumber || 0}`;
+        const sameTurn = renderedTileTurn === turnKey;
+        const arrivingFrom = !sameTurn ? 0 :
+          visibleLetters.startsWith(renderedTileLetters) ? renderedTileLetters.length : visibleLetters.length;
+        container.replaceChildren();
+        container.classList.toggle('disabled', !myTurn);
+        container.classList.toggle('my-turn', Boolean(myTurn));
+        for (const character of required) {
+          const tile = document.createElement('span');
+          tile.className = 'word-tile required';
+          tile.textContent = character;
+          container.append(tile)
+        }
+        for (const [index, character] of [...visibleLetters].entries()) {
+          const tile = document.createElement('span');
+          tile.className = 'word-tile' + (index >= arrivingFrom ? ' arriving' : '');
+          if (index >= arrivingFrom) tile.style.setProperty('--bounce-delay', `${(index - arrivingFrom) * 75}ms`);
+          tile.addEventListener('animationend', event => {
+            if (event.animationName === 'letterArrive') tile.classList.remove('arriving')
+          });
+          tile.textContent = character;
+          container.append(tile)
+        }
+        if (myTurn) {
+          const cursor = document.createElement('span');
+          cursor.className = 'word-tile cursor';
+          cursor.setAttribute('aria-hidden', 'true');
+          container.append(cursor)
+        }
+        const word = required + visibleLetters;
+        container.setAttribute('aria-label', word ? 'Your word: ' + word : 'Your word is empty');
+        renderedTileTurn = turnKey;
+        renderedTileLetters = visibleLetters
+      }
+
+      function renderLetterChoices() {
+        const container = $('letterChoices');
+        container.replaceChildren();
+        const canChoose = room?.openingChoice && room.turn === actingPlayerId();
+        for (const letter of room?.openingLetters || []) {
+          const button = document.createElement('button');
+          button.className = 'letter-choice';
+          button.type = 'button';
+          button.textContent = letter.toUpperCase();
+          button.disabled = !canChoose;
+          button.onclick = () => chooseOpeningLetter(letter);
+          container.append(button)
+        }
+      }
+
+      function publishDraft() {
+        clearTimeout(draftPublishTimer);
+        const turnNumber = room?.turnNumber;
+        const actor = actingPlayerId();
+        const draft = typedLetters;
+        draftPublishTimer = setTimeout(async () => {
+          if (!roomId || room?.status !== 'playing' || room.turn !== actor || room.turnNumber !== turnNumber) return;
+          try {
+            await update(ref(db, 'rooms/' + roomId), {
+              draft,
+              draftPlayer: actor,
+              draftTurn: turnNumber
+            })
+          } catch (error) {
+            console.warn('Could not share typing:', error)
+          }
+        }, 180)
+      }
+
+      function flashInvalidWord(reason = '') {
+        const container = $('wordTiles');
+        const gamePanel = document.querySelector('.game-main');
+        clearTimeout(invalidAnimationTimer);
+        container.classList.remove('invalid');
+        gamePanel?.classList.remove('invalid');
+        $('timerBar').classList.remove('invalid');
+        void container.offsetWidth;
+        container.classList.add('invalid');
+        gamePanel?.classList.add('invalid');
+        $('timerBar').classList.add('invalid');
+        if (reason) {
+          timerErrorText = reason;
+          timerErrorUntil = Date.now() + 700;
+          $('timer').textContent = reason
+        }
+        invalidAnimationTimer = setTimeout(() => {
+          container.classList.remove('invalid');
+          gamePanel?.classList.remove('invalid');
+          $('timerBar').classList.remove('invalid');
+          timerErrorUntil = 0;
+          if (room?.status === 'playing') {
+            const remaining = Math.max(0, room.deadline - Date.now() - offset);
+            $('timer').textContent = '00:' + String(Math.ceil(remaining / 1000)).padStart(2, '0')
+          }
+        }, 700)
+      }
+
+      function render() {
+        if (!room) return;
+        if (room.status === 'lobby') {
+          show('lobby');
+          $('roomCode').textContent = roomId;
+          $('lobbyCount').textContent = `(${players(room).length}/10)`;
+          renderPlayers('lobbyPlayers', room);
+          $('start').disabled = !isHost(room) || players(room).length < 2;
+          return
+        }
+        if (room.status === 'finished') {
+          show('winner');
+          $('winnerName').textContent = (room.players?.[room.winner]?.name || 'Nobody') + ' wins!';
+          renderResults(room);
+          return
+        }
+        show('game');
+        renderPlayers('gamePlayers', room);
+        const choosing = Boolean(room.openingChoice);
+        const voting = Boolean(room.wordVote);
+        const chooserName = room.players?.[room.turn]?.name || 'Someone';
+        const actor = actingPlayerId();
+        $('lastWordLabel').textContent = 'LAST WORD: ' + (room.lastWord || '—').toUpperCase();
+        $('lastWord').textContent = voting ? 'WORD CHALLENGE' : choosing ?
+          (room.turn === actor ? 'CHOOSE A LETTER' : chooserName.toUpperCase() + ' IS CHOOSING') :
+          (room.turn === actor ? 'YOUR TURN' : chooserName.toUpperCase() + ' IS THINKING');
+        const myTurn = !voting && !choosing && room.turn === actor && room.players?.[actor]?.alive;
+        const turnKey = `${room.turn || ''}:${room.turnNumber || 0}`;
+        if (typingTurn !== turnKey) {
+          typedLetters = '';
+          typingTurn = turnKey
+        }
+        $('wordTiles').classList.toggle('hide', choosing || voting);
+        $('letterChoices').classList.toggle('hide', !choosing);
+        if (voting) {
+          $('wordPrompt').textContent = 'Vote in the Power Ups panel'
+        } else if (choosing) {
+          const recipient = room.openingRecipientSelf ? room.turn : nextAlivePlayer(room, room.turn);
+          const recipientName = room.players?.[recipient]?.name || 'the next player';
+          $('wordPrompt').textContent = room.turn === actor ?
+            (recipient === actor ? 'Choose the first letter for your word' : 'Choose a letter for ' + recipientName) :
+            (recipient === room.turn ? 'Waiting for ' + chooserName + ' to choose their starting letter' :
+              'Waiting for ' + chooserName + ' to choose a letter for ' + recipientName);
+          renderLetterChoices()
+        } else {
+          $('wordPrompt').textContent = requiredLetter() ? 'Next word must start with' : 'Type any word';
+          renderWordTiles(myTurn)
+        }
+        if (myTurn && document.activeElement !== $('keyboardCapture')) requestAnimationFrame(focusKeyboard);
+        renderPowerUps()
+      }
+      async function start() {
+        if (!room || !isHost(room)) return;
+        try {
+          await loadDictionary();
+          const openingLetters = randomOpeningLetters();
+          if (openingLetters.length < 4) throw Error('Could not find four playable starting letters.');
+          const result = await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'lobby' || r.host !== playerId || Object.keys(r.players || {}).length < 2) return;
+            const order = players(r).map(([id]) => id);
+            for (const id of order) {
+              r.players[id].alive = true;
+              r.players[id].lives = 2
+            }
+            r.status = 'playing';
+            r.lobbyExpiresAt = 0;
+            r.duration = 15;
+            r.order = order;
+            r.turn = order[crypto.getRandomValues(new Uint32Array(1))[0] % order.length];
+            r.lastWord = '';
+            r.requiredPrefix = '';
+            r.openingChoice = true;
+            r.openingRecipientSelf = true;
+            r.openingLetters = openingLetters;
+            r.words = [];
+            r.draft = '';
+            r.draftPlayer = '';
+            r.draftTurn = 1;
+            r.turnNumber = 1;
+            r.turnMistakes = 0;
+            r.mistakePulse = 0;
+            delete r.wordVote;
+            r.stats = {
+              words: 0,
+              totalTimeMs: 0,
+              totalWordLength: 0
+            };
+            r.playerStats = Object.fromEntries(order.map(id => [id, {
+              words: 0,
+              totalTimeMs: 0,
+              totalWordLength: 0
+            }]));
+            r.powerUps = Object.fromEntries(order.map(id => [id, { hintCharge: 0 }]));
+            r.turnStartedAt = Date.now() + offset;
+            r.deadline = r.turnStartedAt + 15000;
+            return r
+          }, {
+            applyLocally: false
+          });
+          if (result.committed) {
+            room = result.snapshot.val();
+            render()
+          }
+        } catch (e) {
+          message('homeMsg', e.message, true)
+        }
+      }
+
+      async function chooseOpeningLetter(letter) {
+        const actor = actingPlayerId();
+        if (!room?.openingChoice || room.turn !== actor || !(room.openingLetters || []).includes(letter)) return;
+        const turnNumber = room.turnNumber;
+        try {
+          const result = await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'playing' || !r.openingChoice || r.turn !== actor || r.turnNumber !== turnNumber) return;
+            if (!(r.openingLetters || []).includes(letter)) return;
+            const openingRecipientSelf = r.openingRecipientSelf;
+            const recipient = openingRecipientSelf ? actor : nextAlivePlayer(r, actor);
+            if (!recipient || !r.players?.[recipient]?.alive) return;
+            r.openingChoice = false;
+            r.openingRecipientSelf = false;
+            r.openingLetters = [];
+            r.requiredPrefix = letter;
+            r.turn = recipient;
+            r.turnMistakes = 0;
+            r.turnNumber = (r.turnNumber || 0) + 1;
+            r.draft = '';
+            r.draftPlayer = '';
+            r.draftTurn = r.turnNumber;
+            r.turnStartedAt = Date.now() + offset;
+            r.deadline = r.turnStartedAt + 15000;
+            return r
+          }, {
+            applyLocally: false
+          });
+          if (result.committed) {
+            room = result.snapshot.val();
+            render()
+          }
+        } catch (error) {
+          console.warn('Could not choose opening letter:', error)
+        }
+      }
+
+      function loseLifeAndEndTurn(r, turn) {
+        const player = r.players[turn];
+        player.lives = Math.max(0, (player.lives ?? 2) - 1);
+        player.alive = player.lives > 0;
+        r.turnMistakes = 0;
+        r.draft = '';
+        r.draftPlayer = '';
+        r.turnNumber = (r.turnNumber || 0) + 1;
+        r.draftTurn = r.turnNumber;
+        const alive = r.order.filter(id => r.players[id]?.alive);
+        if (alive.length <= 1) {
+          r.status = 'finished';
+          r.winner = alive[0] || '';
+          r.turn = '';
+          r.deadline = 0;
+          return r
+        }
+        r.requiredPrefix = '';
+        r.openingChoice = true;
+        r.openingRecipientSelf = false;
+        r.openingLetters = randomOpeningLetters(r.words || []);
+        r.turn = turn;
+        r.turnStartedAt = Date.now() + offset;
+        r.deadline = r.turnStartedAt + 15000;
+        return r
+      }
+
+      async function registerMistake() {
+        const turnNumber = room?.turnNumber;
+        const actor = actingPlayerId();
+        try {
+          await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'playing' || r.turn !== actor || r.turnNumber !== turnNumber || !r.players?.[actor]?.alive) return;
+            if (Date.now() + offset > r.deadline + TURN_SUBMISSION_GRACE) return;
+            r.turnMistakes = (r.turnMistakes || 0) + 1;
+            r.mistakePulse = (r.mistakePulse || 0) + 1;
+            if (r.turnMistakes >= 5) return loseLifeAndEndTurn(r, actor);
+            return r
+          }, {
+            applyLocally: false
+          })
+        } catch (error) {
+          console.warn('Could not record mistake:', error)
+        }
+      }
+
+      function acceptWord(r, word, actor, submittedAt, recordedTimeMs = null) {
+        r.words = [...(r.words || []), word];
+        r.lastWord = word;
+        r.requiredPrefix = chooseNextPrefix(word, r.words);
+        const turnStartedAt = r.turnStartedAt || submittedAt - 15000;
+        const timeSpent = recordedTimeMs === null ?
+          Math.max(0, Math.min(15000, submittedAt - turnStartedAt)) : recordedTimeMs;
+        r.stats = r.stats || { words: 0, totalTimeMs: 0, totalWordLength: 0 };
+        r.stats.words += 1;
+        r.stats.totalTimeMs += timeSpent;
+        r.stats.totalWordLength += word.length;
+        r.playerStats = r.playerStats || {};
+        const playerStats = r.playerStats[actor] || { words: 0, totalTimeMs: 0, totalWordLength: 0 };
+        playerStats.words += 1;
+        playerStats.totalTimeMs += timeSpent;
+        playerStats.totalWordLength += word.length;
+        r.playerStats[actor] = playerStats;
+        r.draft = '';
+        r.draftPlayer = '';
+        r.turnMistakes = 0;
+        const alive = r.order.filter(id => r.players[id]?.alive);
+        const idx = alive.indexOf(actor);
+        chargeHintAfterWord(r, actor);
+        r.turn = alive[(idx + 1) % alive.length];
+        r.turnNumber = (r.turnNumber || 0) + 1;
+        r.turnStartedAt = Date.now() + offset;
+        r.deadline = r.turnStartedAt + 15000;
+        return r
+      }
+
+      async function submitWord() {
+        if (!room || checking) return;
+        const actor = actingPlayerId();
+        const submittedAt = Date.now() + offset;
+        const word = requiredLetter() + typedLetters;
+        if (!/^[a-z]{2,40}$/.test(word)) {
+          message('gameMsg', 'Use an English word with at least 2 letters (A–Z only).', true);
+          checking = true;
+          try {
+            await registerMistake()
+          } finally {
+            checking = false
+          }
+          return
+        }
+        if (requiredLetter() && !word.startsWith(requiredLetter())) {
+          message('gameMsg', 'Your word must start with ' + requiredLetter().toUpperCase() + '.', true);
+          return
+        }
+        if ((room.words || []).includes(word)) {
+          message('gameMsg', 'That word has already been used!', true);
+          registerMistake();
+          return
+        }
+        checking = true;
+        try {
+          const dictionary = await loadDictionary();
+          if (!dictionary.has(word)) {
+            message('gameMsg', 'Not found in the dictionary. Try another word.', true);
+            appealWord = word;
+            appealTurn = `${actor}:${room.turnNumber}`;
+            await registerMistake();
+            renderPowerUps();
+            return;
+          }
+          const result = await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'playing' || r.wordVote || r.turn !== actor || !r.players?.[actor]?.alive || submittedAt > r.deadline + TURN_SUBMISSION_GRACE) return;
+            const required = prefixForRoom(r);
+            if (required && !word.startsWith(required)) return;
+            if ((r.words || []).includes(word)) return;
+            return acceptWord(r, word, actor, submittedAt)
+          }, {
+            applyLocally: false
+          });
+          if (result.committed) {
+            typedLetters = '';
+            appealWord = '';
+            appealTurn = '';
+            room = result.snapshot.val();
+            render();
+            message('gameMsg', 'Nice word!')
+          } else message('gameMsg', 'Turn expired or the game changed. Try again.', true)
+        } catch (e) {
+          message('gameMsg', 'Could not validate word: ' + e.message + ' Make sure words.json is uploaded beside lettergame.html.', true)
+        } finally {
+          checking = false;
+        }
+      }
+
+      function resolveWordVote(r, approved) {
+        const vote = r.wordVote;
+        if (!vote) return r;
+        delete r.wordVote;
+        if (approved) return acceptWord(r, vote.word, vote.submitter, Date.now() + offset, vote.timeSpentMs || 0);
+        return loseLifeAndEndTurn(r, vote.submitter)
+      }
+
+      async function startWordChallenge() {
+        const actor = actingPlayerId();
+        const turnNumber = room?.turnNumber;
+        const word = appealWord;
+        if (!isMyTurn() || !word || appealTurn !== `${actor}:${turnNumber}` || room.wordVote) return;
+        voteResolving = true;
+        renderPowerUps();
+        try {
+          const now = Date.now() + offset;
+          const result = await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'playing' || r.wordVote || r.openingChoice ||
+              r.turn !== actor || r.turnNumber !== turnNumber || (r.words || []).includes(word)) return;
+            const required = prefixForRoom(r);
+            if (required && !word.startsWith(required)) return;
+            const voterIds = (r.order || []).filter(id => r.players?.[id] && r.players[id].connected !== false);
+            if (!voterIds.includes(actor)) voterIds.push(actor);
+            if (voterIds.length < 2) return;
+            const turnStartedAt = r.turnStartedAt || now - 15000;
+            r.wordVote = {
+              word,
+              submitter: actor,
+              turnNumber,
+              deadline: now + WORD_VOTE_DURATION,
+              voterIds,
+              votes: { [actor]: true },
+              timeSpentMs: Math.max(0, Math.min(15000, now - turnStartedAt))
+            };
+            r.deadline = 0;
+            r.draft = '';
+            r.draftPlayer = '';
+            return r
+          }, { applyLocally: false });
+          if (!result.committed) throw Error('A challenge needs at least one other connected player.');
+          room = result.snapshot.val();
+          appealWord = '';
+          appealTurn = '';
+          typedLetters = '';
+          render()
+        } catch (error) {
+          message('gameMsg', error.message, true)
+        } finally {
+          voteResolving = false;
+          renderPowerUps()
+        }
+      }
+
+      async function castWordVote(approved) {
+        const activeVote = room?.wordVote;
+        const voter = localVoterId(activeVote);
+        if (!activeVote || !voter || voteResolving) return;
+        voteResolving = true;
+        renderPowerUps();
+        try {
+          await loadDictionary();
+          const result = await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            const vote = r?.wordVote;
+            if (!vote || vote.turnNumber !== activeVote.turnNumber || vote.word !== activeVote.word ||
+              !(vote.voterIds || []).includes(voter) || vote.votes?.[voter] !== undefined) return;
+            if (Date.now() + offset >= vote.deadline) return resolveWordVote(r, false);
+            vote.votes = { ...(vote.votes || {}), [voter]: approved };
+            const yesVotes = vote.voterIds.filter(id => vote.votes[id] === true).length;
+            const castVotes = vote.voterIds.filter(id => vote.votes[id] !== undefined).length;
+            const required = Math.floor(vote.voterIds.length / 2) + 1;
+            if (yesVotes >= required) return resolveWordVote(r, true);
+            if (yesVotes + (vote.voterIds.length - castVotes) < required) return resolveWordVote(r, false);
+            return r
+          }, { applyLocally: false });
+          if (result.committed) {
+            room = result.snapshot.val();
+            render()
+          }
+        } catch (error) {
+          console.warn('Could not cast word vote:', error)
+        } finally {
+          voteResolving = false;
+          renderPowerUps()
+        }
+      }
+
+      async function expireWordVote() {
+        if (!room?.wordVote || voteResolving || Date.now() + offset < room.wordVote.deadline) return;
+        voteResolving = true;
+        try {
+          await loadDictionary();
+          await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r?.wordVote || Date.now() + offset < r.wordVote.deadline) return;
+            return resolveWordVote(r, false)
+          }, { applyLocally: false })
+        } catch (error) {
+          console.warn('Could not resolve expired word vote:', error)
+        } finally {
+          voteResolving = false
+        }
+      }
+
+      async function useHint() {
+        const actor = actingPlayerId();
+        if (!isMyTurn() || hintLoading || hintState(room, actor).hintCharge < HINT_COOLDOWN_TURNS) return;
+        const prefix = requiredLetter();
+        const turnNumber = room.turnNumber;
+        hintLoading = true;
+        renderPowerUps();
+        try {
+          const dictionary = await loadDictionary();
+          const usedWords = new Set(room.words || []);
+          const candidates = [];
+          for (const word of dictionary) {
+            if (word.startsWith(prefix) && word.length >= prefix.length + 3 && !usedWords.has(word)) {
+              candidates.push(word)
+            }
+          }
+          if (!candidates.length) throw Error('No unused hint words remain for this prefix.');
+          const random = crypto.getRandomValues(new Uint32Array(1))[0];
+          const hintedWord = candidates[random % candidates.length];
+          const result = await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'playing' || r.wordVote || r.openingChoice || r.turn !== actor ||
+              r.turnNumber !== turnNumber || Date.now() + offset > r.deadline + TURN_SUBMISSION_GRACE) return;
+            if (prefixForRoom(r) !== prefix || (r.words || []).includes(hintedWord)) return;
+            const power = hintState(r, actor);
+            if ((power.hintCharge || 0) < HINT_COOLDOWN_TURNS) return;
+            r.powerUps = r.powerUps || {};
+            r.powerUps[actor] = { ...power, hintCharge: 0 };
+            return r
+          }, { applyLocally: false });
+          if (!result.committed) throw Error('The turn changed before the hint could be used.');
+          room = result.snapshot.val();
+          hintText = hintedWord.slice(0, prefix.length + 3).toUpperCase();
+          hintTurn = `${actor}:${turnNumber}`
+        } catch (error) {
+          message('gameMsg', error.message, true)
+        } finally {
+          hintLoading = false;
+          renderPowerUps()
+        }
+      }
+
+      function handleGameTyping(event) {
+        if (!isMyTurn() || checking || event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return;
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          submitWord();
+          return
+        }
+        if (event.key === 'Backspace') {
+          event.preventDefault();
+          typedLetters = typedLetters.slice(0, -1);
+          renderWordTiles(true);
+          publishDraft();
+          return
+        }
+        if (/^[a-z]$/i.test(event.key) && typedLetters.length < 40 - requiredLetter().length) {
+          event.preventDefault();
+          typedLetters += event.key.toLowerCase();
+          renderWordTiles(true);
+          publishDraft()
+        }
+      }
+
+      function handleMobileBeforeInput(event) {
+        if (!isMyTurn() || checking) {
+          event.preventDefault();
+          return
+        }
+        if (event.inputType === 'deleteContentBackward') {
+          event.preventDefault();
+          typedLetters = typedLetters.slice(0, -1);
+          renderWordTiles(true);
+          publishDraft();
+          return
+        }
+        if (event.inputType === 'insertLineBreak') {
+          event.preventDefault();
+          submitWord();
+          return
+        }
+        if (event.inputType.startsWith('insert') && event.data) {
+          event.preventDefault();
+          const available = 40 - requiredLetter().length - typedLetters.length;
+          const letters = event.data.toLowerCase().replace(/[^a-z]/g, '').slice(0, available);
+          if (!letters) return;
+          typedLetters += letters;
+          renderWordTiles(true);
+          publishDraft()
+        }
+      }
+
+      function handleMobileInput() {
+        const capture = $('keyboardCapture');
+        const value = capture.value;
+        capture.value = '';
+        if (!value || !isMyTurn() || checking) return;
+        const available = 40 - requiredLetter().length - typedLetters.length;
+        const letters = value.toLowerCase().replace(/[^a-z]/g, '').slice(0, available);
+        if (!letters) return;
+        typedLetters += letters;
+        renderWordTiles(true);
+        publishDraft()
+      }
+      async function expireTurn() {
+        const expiryDelay = TURN_SUBMISSION_GRACE + TURN_EXPIRY_BUFFER;
+        if (!room || room.status !== 'playing' || room.wordVote || Date.now() + offset < room.deadline + expiryDelay) return;
+        const turn = room.turn,
+          turnNo = room.turnNumber;
+        try {
+          await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'playing' || r.wordVote || r.turn !== turn || r.turnNumber !== turnNo || Date.now() + offset < r.deadline + expiryDelay) return;
+            return loseLifeAndEndTurn(r, turn)
+          }, {
+            applyLocally: false
+          })
+        } catch (e) {
+          console.warn('Timeout sync failed', e)
+        }
+      }
+      setInterval(() => {
+        if (!room || room.status !== 'playing') return;
+        if (room.wordVote) {
+          const voteRemaining = Math.max(0, room.wordVote.deadline - Date.now() - offset);
+          $('timer').textContent = 'VOTE ' + String(Math.ceil(voteRemaining / 1000)).padStart(2, '0');
+          $('timerFill').style.width = (voteRemaining / WORD_VOTE_DURATION * 100) + '%';
+          $('timerFill').style.background = '#ffe267';
+          renderWordVote();
+          if (voteRemaining <= 0) expireWordVote();
+          return
+        }
+        const remaining = Math.max(0, room.deadline - Date.now() - offset);
+        $('timer').textContent = Date.now() < timerErrorUntil ? timerErrorText :
+          '00:' + String(Math.ceil(remaining / 1000)).padStart(2, '0');
+        $('timerFill').style.width = (remaining / 15000 * 100) + '%';
+        $('timerFill').style.background = remaining < 5000 ? '#d7ff3f' : '#00ff41';
+        if (room.deadline - Date.now() - offset <= -(TURN_SUBMISSION_GRACE + TURN_EXPIRY_BUFFER)) expireTurn()
+      }, 350);
+
+      async function expireLobby() {
+        if (!roomId || !room || expiringRoom) return;
+        const now = Date.now() + offset;
+        if (room.status !== 'lobby' || now < lobbyDeadline(room)) return;
+        expiringRoom = true;
+        const expiringRoomId = roomId;
+        try {
+          await runTransaction(ref(db, 'rooms/' + expiringRoomId), r => {
+            if (!r) return r;
+            return r.status === 'lobby' && now >= lobbyDeadline(r) ? null : r;
+          }, { applyLocally: false })
+        } catch (error) {
+          console.warn('Could not expire lobby:', error)
+        } finally {
+          expiringRoom = false
+        }
+      }
+      setInterval(expireLobby, 30000);
+      function showHomeMode(mode) {
+        $('showCreate').classList.toggle('selected', mode === 'create');
+        $('showJoin').classList.toggle('selected', mode === 'join');
+        $('showCreate').setAttribute('aria-pressed', String(mode === 'create'));
+        $('showJoin').setAttribute('aria-pressed', String(mode === 'join'));
+        $('playerSetup').classList.remove('hide');
+        $('setupFields').classList.toggle('join-mode', mode === 'join');
+        $('codeField').classList.toggle('hide', mode !== 'join');
+        $('createBox').classList.toggle('hide', mode !== 'create');
+        $('joinBox').classList.toggle('hide', mode !== 'join');
+        $('homeMsg').classList.add('hide');
+        if (!$('name').value.trim()) $('name').focus();
+        else if (mode === 'join') $('code').focus()
+      }
+
+      function handleHomeEnter(event) {
+        if (event.key !== 'Enter' || event.isComposing) return;
+        event.preventDefault();
+        const joining = $('showJoin').classList.contains('selected');
+        if (joining) {
+          if (event.currentTarget === $('name') && !$('code').value.trim()) {
+            $('code').focus();
+            return
+          }
+          join()
+        } else if ($('showCreate').classList.contains('selected')) {
+          create()
+        }
+      }
+      $('create').onclick = create;
+      $('showCreate').onclick = () => showHomeMode('create');
+      $('showJoin').onclick = () => showHomeMode('join');
+      $('join').onclick = join;
+      $('name').addEventListener('keydown', handleHomeEnter);
+      $('code').addEventListener('keydown', handleHomeEnter);
+      $('start').onclick = start;
+      document.addEventListener('keydown', handleGameTyping);
+      $('keyboardCapture').addEventListener('beforeinput', handleMobileBeforeInput);
+      $('keyboardCapture').addEventListener('input', handleMobileInput);
+      $('wordTiles').addEventListener('click', focusKeyboard);
+      $('hintPower').onclick = useHint;
+      $('challengeWord').onclick = startWordChallenge;
+      $('voteYes').onclick = () => castWordVote(true);
+      $('voteNo').onclick = () => castWordVote(false);
+      $('leaveRoom').onclick = leaveLobby;
+      $('again').onclick = async () => {
+        if (!roomId) return;
+        try {
+          await runTransaction(ref(db, 'rooms/' + roomId), r => {
+            if (!r || r.status !== 'finished') return;
+            for (const [id, player] of Object.entries(r.players || {})) {
+              if (id !== playerId && player.connected === false) delete r.players[id]
+            }
+            if (r.players?.[playerId]) r.players[playerId].connected = true;
+            if (!r.players?.[r.host]) r.host = players(r)[0]?.[0] || playerId;
+            r.status = 'lobby';
+            r.lobbyExpiresAt = Date.now() + offset + LOBBY_LIFETIME;
+            r.turn = '';
+            r.winner = '';
+            r.order = [];
+            r.lastWord = '';
+            r.requiredPrefix = '';
+            r.openingChoice = false;
+            r.openingRecipientSelf = false;
+            r.openingLetters = [];
+            r.words = [];
+            r.deadline = 0;
+            r.turnStartedAt = 0;
+            r.turnNumber = 0;
+            r.turnMistakes = 0;
+            r.mistakePulse = 0;
+            delete r.wordVote;
+            r.stats = {
+              words: 0,
+              totalTimeMs: 0,
+              totalWordLength: 0
+            };
+            r.playerStats = {};
+            r.draft = '';
+            r.draftPlayer = '';
+            r.draftTurn = 0;
+            for (const player of Object.values(r.players || {})) {
+              player.alive = true;
+              player.lives = 2
+            }
+            return r
+          }, {
+            applyLocally: false
+          })
+        } catch (error) {
+          console.warn('Could not return to lobby:', error)
+        }
+      };
+      const invite = new URLSearchParams(location.search).get('room');
+      if (invite && (/^[A-Z]{4}$/i.test(invite) || /^DEV$/i.test(invite))) {
+        $('code').value = invite.toUpperCase();
+        showHomeMode('join')
+      }
+    </script>
+  </body>
+</html>
